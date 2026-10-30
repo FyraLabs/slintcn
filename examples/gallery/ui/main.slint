@@ -1,8 +1,8 @@
 import { Button, Palette } from "std-widgets.slint";
-import { Alert, AlertVariant } from "@slintcn/alert.slint";
-import { AlertDialog } from "@slintcn/alert-dialog.slint";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@slintcn/card.slint";
-import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
+import { Alert, AlertVariant } from "@slintcn/components/alert.slint";
+import { AlertDialog } from "@slintcn/components/alert-dialog.slint";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@slintcn/components/card.slint";
+import { Dialog, DialogFooter } from "@slintcn/components/dialog.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -25,7 +25,6 @@ export component Gallery inherits Window {
             Button { text: "Add"; icon: @image-url("icons/plus.svg"); colorize-icon: true; }
             Button { text: "Disabled"; enabled: false; }
             Button { text: "Checkable"; checkable: true; }
-            Button { text: "Destructive"; destructive: true; }
             Button {
                 text: Palette.color-scheme == ColorScheme.dark ? "Light mode" : "Dark mode";
                 clicked => {
@@ -93,7 +92,6 @@ export component Gallery inherits Window {
 
             open-alert-dialog := Button {
                 text: "Delete account";
-                destructive: true;
                 clicked => { delete-dialog.show(); }
             }
 
@@ -144,7 +142,6 @@ export component Gallery inherits Window {
         title: "Are you absolutely sure?";
         description: "This action cannot be undone. This will permanently delete your account and remove your data from our servers.";
         action-text: "Delete account";
-        destructive: true;
         cancel => { root.last-result = "Delete cancelled"; }
         action => { root.last-result = "Account deleted"; }
     }

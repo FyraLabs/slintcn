@@ -11,7 +11,7 @@ slintcn has two parts, shipped together in one folder:
 1. **A Slint widget style.** With the `slintcn` style selected, Slint's standard widgets (`Button`, `LineEdit`, `CheckBox`, …) from `std-widgets.slint` get the shadcn look. Your code uses the normal Slint API, so switching back to `fluent` or `material` is a one-line change.
 2. **Extra components** that Slint doesn't have (Card, Badge, Dialog, …), imported from `@slintcn/…`.
 
-Like shadcn, you don't depend on slintcn as a package. You copy its files into your project and they become yours to edit. To change colors, edit `styling.slint`. To change how a button looks, edit `button.slint`.
+Like shadcn, you don't depend on slintcn as a package. You copy its files into your project and they become yours to edit. To change colors, edit `styling.slint`. To change how a button looks, edit `std/button.slint`.
 
 ## Usage
 
@@ -27,10 +27,11 @@ my-app/
   ui/
     main.slint
     slintcn/
-      std-widgets.slint
+      std-widgets.slint    style entry point
       style-base.slint
-      styling.slint
-      …
+      styling.slint        colors and radii
+      std/                 standard widgets (Button, …)
+      components/          extras (Card, Alert, …)
 ```
 
 The folder name is the style name. To rename the style (e.g. `myapp`), rename the folder and use that name everywhere below.
@@ -56,7 +57,7 @@ fn main() {
 All three settings are needed:
 
 - `with_style` selects the style.
-- The include paths let Slint find it. `ui` is where Slint checks that a `slintcn/` style exists; `ui/slintcn` is where `import … from "std-widgets.slint"` is resolved.
+- The include paths let Slint find it. `ui` is where Slint checks that a `slintcn/` style exists; `ui/slintcn` is where `import … from "std-widgets.slint"` is resolved. The `ui/slintcn` include path is what actually applies the style: to switch to another style like `fluent`, remove it as well as changing `with_style`.
 - The library path makes `@slintcn/…` imports work for the extra components.
 
 `slint-viewer`:
@@ -99,7 +100,7 @@ Once Slint 1.19 ships `slint-project.json`, most of this should move there.
 
 ```slint
 import { Button, LineEdit } from "std-widgets.slint"; // standard widgets, slintcn look
-import { Card } from "@slintcn/card.slint";           // slintcn extra
+import { Card } from "@slintcn/components/card.slint"; // slintcn extra
 
 export component App inherits Window {
     // …
@@ -140,8 +141,8 @@ Everything else in `std-widgets.slint` is still to do. Until a widget exists, im
 | Component | Import | Status |
 |---|---|---|
 | `SlintcnPalette` (shadcn colors: `primary`, `muted`, `ring`, …), `SlintcnSizeSettings` (`radius-md`, …) | `@slintcn/styling.slint` | draft |
-| `Alert`, `AlertVariant` | `@slintcn/alert.slint` | draft |
-| `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` | `@slintcn/card.slint` | draft |
+| `Alert`, `AlertVariant` | `@slintcn/components/alert.slint` | draft |
+| `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` | `@slintcn/components/card.slint` | draft |
 
 ## Developing slintcn
 
