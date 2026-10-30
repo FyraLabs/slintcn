@@ -12,6 +12,7 @@ slintcn/                  the style and extras; this folder is what users copy
   _x.svg, …               icons used by the style (see Icons in styling.slint)
   std/                    standard widgets (Slint's std-widgets API): button.slint, …
   components/             extras (imported as @slintcn/components/…): card.slint, alert.slint, dialog.slint, …
+    palette.slint         ComponentPalette: the extras' colors, taken from the active style's Palette
 examples/gallery/         Rust app that uses slintcn/ the way a user's app would
   build.rs                selects the slintcn style, include paths and @slintcn library path
   ui/main.slint           the gallery window
@@ -34,10 +35,11 @@ The files follow the layout of Slint's built-in styles (Fluent, Cupertino, Mater
 - **`StyleMetrics`** and **`Palette`** are the globals Slint requires from every style. The compiler loads them from `style-base.slint` by name. `Palette` maps Slint's slots onto `SlintcnPalette`:
   - `accent-background` → `primary`
   - `control-background` → `secondary`
-  - `alternate-background` → `muted`
+  - `alternate-background` → `card` (Slint uses it for panels, which is what a card is)
 
   `Palette.color-scheme` is two-way bound to `SlintcnPalette.color-scheme`, so apps switch modes with the standard `Palette.color-scheme`.
-- **Components read `SlintcnPalette`**, not `Palette`, so they use shadcn's names. Watch out for one clash: Slint's `Palette.accent-foreground` is the text on a primary button, while shadcn's `accent-foreground` is the text on a subtle hover background.
+- **Standard widgets (`std/`) read `SlintcnPalette`**, not `Palette`, so they use shadcn's names. Watch out for one clash: Slint's `Palette.accent-foreground` is the text on a primary button, while shadcn's `accent-foreground` is the text on a subtle hover background.
+- **Extras (`components/`) read `ComponentPalette`**, which is built from the *active* style's `Palette`. Under slintcn that's shadcn's colors; under Fluent, Cosmic and so on, extras take that style's colors and follow its dark/light mode. Roles Slint's `Palette` doesn't have are derived: muted text is `foreground` at 60%, and `destructive` is shadcn's red for the current mode.
 - **Files import each other with relative paths** (`import { SlintcnPalette } from "../styling.slint";` from `std/` or `components/`), so the folder works under any style or library name.
 - **`std-widgets.slint`, `style-base.slint` and `styling.slint` stay at the top of the folder.** The compiler looks for the first two by exact path.
 
@@ -104,7 +106,7 @@ Extras are shadcn components that Slint's standard set doesn't have (Badge, Aler
 
 - Standard widgets have exactly Slint's API, with no extra properties, and apps only reach them through `std-widgets.slint`. The files in `std/` are how the style draws them, not separate components. Something that needs more than the standard API (a destructive button, say) is an extra with its own name.
 - Start every `.slint` file with `// SPDX-License-Identifier: GPL-3.0-or-later`. Users copy single files, so each one carries its license.
-- Colors come from `SlintcnPalette` and radii from `SlintcnSizeSettings`. Don't hard-code hex values in components; add a token in `styling.slint` instead. Shadows (which shadcn doesn't theme) are the exception.
+- Colors come from `SlintcnPalette` in `std/` and from `ComponentPalette` in `components/`; radii come from `SlintcnSizeSettings`. Don't hard-code hex values in components; add a token in `styling.slint` (or `components/palette.slint`) instead. Shadows (which shadcn doesn't theme) are the exception.
 - Don't make a component inherit `Rectangle` unless app code should be able to change its `background`, `border-radius`, and so on. Put the `Rectangle` inside instead. `Button` and `Card` do this.
 - Size from content: `min-width: max(36px, i-layout.min-width);`, with `horizontal-stretch: 0` for controls.
 - Name internal elements with an `i-` prefix (`i-background`, `i-touch-area`), like Slint's own widgets.
@@ -137,7 +139,6 @@ Extras are shadcn components that Slint's standard set doesn't have (Badge, Aler
 
 ## Known gaps
 
-- Under another style, the extras (Card, Alert, Dialog, …) keep their own dark/light setting, `SlintcnPalette.color-scheme`, which defaults to dark. It's only linked to `Palette.color-scheme` when the slintcn style is active.
 - Only shadcn's neutral base color. Zinc, slate and stone are still to do.
 - The compiler builds tooltips, `TabWidget`, `RadioGroup` and menus from extra parts of a style (`std-widgets-impl.slint` in built-in styles). What a custom style needs to provide for those is untested.
 - Shared standard pieces (`VerticalBox`, `HorizontalBox`, `GridBox`, `ListView`, `StandardButton`, …) have to be written from scratch, because a custom style can't import Slint's built-in files.

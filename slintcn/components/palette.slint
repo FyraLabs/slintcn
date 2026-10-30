@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette } from "std-widgets.slint";
+
+// Built from the active style's Palette, so extras match whichever style is selected.
+export global ComponentPalette {
+    property <bool> dark: Palette.color-scheme == ColorScheme.dark;
+
+    out property <brush> background: Palette.background;
+    out property <brush> foreground: Palette.foreground;
+    out property <brush> card: Palette.alternate-background;
+    out property <brush> card-foreground: Palette.alternate-foreground;
+    out property <brush> muted-foreground: Palette.foreground.transparentize(0.4);
+    out property <brush> border: Palette.border;
+    out property <color> destructive: dark ? #ff6467 : #e7000b;
+}

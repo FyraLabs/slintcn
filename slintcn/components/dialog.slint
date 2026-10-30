@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { Icons, SlintcnPalette, SlintcnSizeSettings } from "../styling.slint";
+import { Icons, SlintcnSizeSettings } from "../styling.slint";
+import { ComponentPalette } from "palette.slint";
 
 export component DialogFooter inherits HorizontalLayout {
     alignment: end;
@@ -93,10 +94,10 @@ export component Dialog {
                 height: i-panel-layout.preferred-height;
                 x: (parent.width - self.width) / 2;
                 y: (parent.height - self.height) / 2;
-                background: SlintcnPalette.background;
+                background: ComponentPalette.background;
                 border-radius: SlintcnSizeSettings.radius-lg;
                 border-width: 1px;
-                border-color: SlintcnPalette.border;
+                border-color: ComponentPalette.border;
                 drop-shadow-offset-y: 10px;
                 drop-shadow-blur: 15px;
                 drop-shadow-color: #0000001a;
@@ -115,7 +116,7 @@ export component Dialog {
 
                         if root.title != "": Text {
                             text: root.title;
-                            color: SlintcnPalette.foreground;
+                            color: ComponentPalette.foreground;
                             font-size: 18px;
                             font-weight: 600;
                             wrap: word-wrap;
@@ -123,7 +124,7 @@ export component Dialog {
 
                         if root.description != "": Text {
                             text: root.description;
-                            color: SlintcnPalette.muted-foreground;
+                            color: ComponentPalette.muted-foreground;
                             font-size: 14px;
                             wrap: word-wrap;
                         }
@@ -145,7 +146,7 @@ export component Dialog {
 
                     Image {
                         source: Icons.x;
-                        colorize: SlintcnPalette.foreground;
+                        colorize: ComponentPalette.foreground;
                         opacity: i-close.has-hover ? 1 : 0.7;
                         animate opacity { duration: 150ms; }
                     }

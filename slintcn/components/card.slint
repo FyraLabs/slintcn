@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { SlintcnPalette, SlintcnSizeSettings } from "../styling.slint";
+import { SlintcnSizeSettings } from "../styling.slint";
+import { ComponentPalette } from "palette.slint";
 
 export component Card {
     Rectangle {
-        background: SlintcnPalette.card;
+        background: ComponentPalette.card;
         border-radius: SlintcnSizeSettings.radius-xl;
         border-width: 1px;
-        border-color: SlintcnPalette.border;
+        border-color: ComponentPalette.border;
         drop-shadow-offset-y: 1px;
         drop-shadow-blur: 3px;
         drop-shadow-color: #0000001a;
@@ -29,13 +30,13 @@ export component CardHeader inherits VerticalLayout {
 }
 
 export component CardTitle inherits Text {
-    color: SlintcnPalette.card-foreground;
+    color: ComponentPalette.card-foreground;
     font-size: 16px;
     font-weight: 600;
 }
 
 export component CardDescription inherits Text {
-    color: SlintcnPalette.muted-foreground;
+    color: ComponentPalette.muted-foreground;
     font-size: 14px;
     wrap: word-wrap;
 }
