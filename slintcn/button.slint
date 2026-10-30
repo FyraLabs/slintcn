@@ -1,0 +1,131 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export component Button {
+    in property <string> text;
+    in property <image> icon;
+    in property <length> icon-size: 16px;
+    in property <bool> primary;
+    in property <bool> enabled <=> i-touch-area.enabled;
+    in property <bool> checkable;
+    in property <bool> colorize-icon;
+    out property <bool> has-focus: i-focus-scope.has-focus;
+    out property <bool> pressed: self.enabled && i-touch-area.pressed;
+    in-out property <bool> checked;
+    in property <bool> destructive;
+
+    callback clicked;
+
+    property <bool> dark: SlintcnPalette.color-scheme == ColorScheme.dark;
+    property <bool> filled: root.primary || root.destructive;
+    property <bool> has-icon: root.icon.width > 0 && root.icon.height > 0;
+    property <bool> keyboard-focus;
+    property <bool> focus-visible: root.has-focus && root.keyboard-focus;
+    property <color> fill: root.destructive ? (root.dark ? SlintcnPalette.destructive.transparentize(0.4) : SlintcnPalette.destructive) : SlintcnPalette.primary;
+    property <color> fill-foreground: root.destructive ? #ffffff : SlintcnPalette.primary-foreground;
+    property <color> text-color: root.filled ? root.fill-foreground : SlintcnPalette.foreground;
+
+    min-width: max(36px, i-layout.min-width);
+    min-height: max(36px, i-layout.min-height);
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    forward-focus: i-focus-scope;
+
+    accessible-role: button;
+    accessible-enabled: root.enabled;
+    accessible-checkable: root.checkable;
+    accessible-checked: root.checked;
+    accessible-label: root.text;
+    accessible-action-default => { i-touch-area.clicked(); }
+
+    states [
+        checked when root.checked: {
+            i-background.background: SlintcnPalette.accent;
+            root.text-color: SlintcnPalette.accent-foreground;
+        }
+        hover when i-touch-area.has-hover: {
+            i-background.background: root.filled ? root.fill.transparentize(0.1) : root.dark ? SlintcnPalette.input.transparentize(0.5) : SlintcnPalette.accent;
+            root.text-color: root.filled ? root.fill-foreground : SlintcnPalette.accent-foreground;
+        }
+    ]
+
+    if root.focus-visible: Rectangle {
+        x: -3px;
+        y: -3px;
+        width: root.width + 6px;
+        height: root.height + 6px;
+        border-radius: SlintcnSizeSettings.radius-md + 3px;
+        border-width: 3px;
+        border-color: root.destructive ? SlintcnPalette.destructive.transparentize(root.dark ? 0.6 : 0.8) : SlintcnPalette.ring.transparentize(0.5);
+    }
+
+    i-background := Rectangle {
+        border-radius: SlintcnSizeSettings.radius-md;
+        border-width: root.filled ? 0 : 1px;
+        border-color: root.focus-visible ? SlintcnPalette.ring : root.dark ? SlintcnPalette.input : SlintcnPalette.border;
+        background: root.filled ? root.fill : root.dark ? SlintcnPalette.input.transparentize(0.7) : SlintcnPalette.background;
+        drop-shadow-offset-y: root.filled ? 0 : 1px;
+        drop-shadow-blur: root.filled ? 0 : 2px;
+        drop-shadow-color: #0000000d;
+        opacity: root.enabled ? 1 : 0.5;
+
+        animate background, border-color { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+
+        i-layout := HorizontalLayout {
+            padding-left: root.has-icon ? 12px : 16px;
+            padding-right: self.padding-left;
+            spacing: 8px;
+            alignment: center;
+
+            if root.has-icon: Image {
+                source: root.icon;
+                width: root.icon-size;
+                height: root.icon-size;
+                y: (parent.height - self.height) / 2;
+                colorize: root.colorize-icon ? root.text-color : transparent;
+                accessible-role: none;
+            }
+
+            if root.text != "": Text {
+                text: root.text;
+                color: root.text-color;
+                font-size: 14px;
+                font-weight: 500;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                accessible-role: none;
+            }
+        }
+    }
+
+    i-touch-area := TouchArea {
+        mouse-cursor: pointer;
+        clicked => {
+            if root.checkable {
+                root.checked = !root.checked;
+            }
+            root.clicked();
+        }
+    }
+
+    i-focus-scope := FocusScope {
+        x: 0;
+        width: 0;
+        enabled <=> root.enabled;
+
+        focus-gained(reason) => {
+            if reason != FocusReason.window-activation {
+                root.keyboard-focus = reason == FocusReason.tab-navigation;
+            }
+        }
+
+        key-pressed(event) => {
+            if event.text == Key.Space || event.text == Key.Return {
+                i-touch-area.clicked();
+                return accept;
+            }
+            return reject;
+        }
+    }
+}

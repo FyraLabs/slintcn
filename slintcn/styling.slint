@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+export global SlintcnPalette {
+    in-out property <ColorScheme> color-scheme: ColorScheme.dark;
+    property <bool> dark: color-scheme == ColorScheme.dark;
+
+    out property <color> background: dark ? #0a0a0a : #ffffff;
+    out property <color> foreground: dark ? #fafafa : #0a0a0a;
+    out property <color> card: dark ? #171717 : #ffffff;
+    out property <color> card-foreground: dark ? #fafafa : #0a0a0a;
+    out property <color> primary: dark ? #e5e5e5 : #171717;
+    out property <color> primary-foreground: dark ? #171717 : #fafafa;
+    out property <color> secondary: dark ? #262626 : #f5f5f5;
+    out property <color> secondary-foreground: dark ? #fafafa : #171717;
+    out property <color> muted: dark ? #262626 : #f5f5f5;
+    out property <color> muted-foreground: dark ? #a1a1a1 : #737373;
+    out property <color> accent: dark ? #262626 : #f5f5f5;
+    out property <color> accent-foreground: dark ? #fafafa : #171717;
+    out property <color> destructive: dark ? #ff6467 : #e7000b;
+    out property <color> border: dark ? #ffffff1a : #e5e5e5;
+    out property <color> input: dark ? #ffffff26 : #e5e5e5;
+    out property <color> ring: dark ? #737373 : #a1a1a1;
+}
+
+export global SlintcnSizeSettings {
+    out property <length> radius: 10px;
+    out property <length> radius-sm: radius - 4px;
+    out property <length> radius-md: radius - 2px;
+    out property <length> radius-lg: radius;
+    out property <length> radius-xl: radius + 4px;
+}
+
+export global Icons {
+    out property <image> x: @image-url("_x.svg");
+}

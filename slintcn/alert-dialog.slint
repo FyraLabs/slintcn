@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button } from "button.slint";
+import { Dialog, DialogFooter } from "dialog.slint";
+
+export component AlertDialog {
+    in property <string> title;
+    in property <string> description;
+    in property <string> cancel-text: "Cancel";
+    in property <string> action-text: "Continue";
+    in property <bool> destructive;
+    out property <bool> is-open: i-dialog.is-open;
+
+    width: 100%;
+    height: 100%;
+
+    callback cancel();
+    callback action();
+
+    public function show() {
+        i-dialog.show();
+    }
+
+    public function close() {
+        i-dialog.close();
+    }
+
+    i-dialog := Dialog {
+        title: root.title;
+        description: root.description;
+        show-close-button: false;
+        dismiss-on-outside-click: false;
+        dismissed => { root.cancel(); }
+
+        DialogFooter {
+            Button {
+                text: root.cancel-text;
+                clicked => {
+                    i-dialog.close();
+                    root.cancel();
+                }
+            }
+
+            Button {
+                text: root.action-text;
+                primary: !root.destructive;
+                destructive: root.destructive;
+                clicked => {
+                    i-dialog.close();
+                    root.action();
+                }
+            }
+        }
+    }
+}

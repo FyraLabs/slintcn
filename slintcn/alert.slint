@@ -1,0 +1,75 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export enum AlertVariant {
+    default,
+    destructive,
+}
+
+export component Alert {
+    in property <AlertVariant> variant;
+    in property <image> icon;
+    in property <string> title;
+    in property <string> description;
+
+    property <bool> has-icon: root.icon.width > 0 && root.icon.height > 0;
+    property <bool> destructive: root.variant == AlertVariant.destructive;
+    property <color> text-color: root.destructive ? SlintcnPalette.destructive : SlintcnPalette.card-foreground;
+
+    accessible-role: text;
+    accessible-label: root.title;
+    accessible-description: root.description;
+
+    Rectangle {
+        background: SlintcnPalette.card;
+        border-radius: SlintcnSizeSettings.radius-lg;
+        border-width: 1px;
+        border-color: SlintcnPalette.border;
+    }
+
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        spacing: 12px;
+
+        if root.has-icon: VerticalLayout {
+            alignment: start;
+            padding-top: 2px;
+
+            Image {
+                source: root.icon;
+                width: 16px;
+                height: 16px;
+                colorize: root.text-color;
+                accessible-role: none;
+            }
+        }
+
+        VerticalLayout {
+            spacing: 2px;
+
+            if root.title != "": Text {
+                text: root.title;
+                color: root.text-color;
+                font-size: 14px;
+                font-weight: 500;
+                letter-spacing: -0.35px;
+                overflow: elide;
+                accessible-role: none;
+            }
+
+            if root.description != "": Text {
+                text: root.description;
+                color: root.destructive ? SlintcnPalette.destructive.transparentize(0.1) : SlintcnPalette.muted-foreground;
+                font-size: 14px;
+                wrap: word-wrap;
+                accessible-role: none;
+            }
+
+            @children
+        }
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "lsp": {
+        "slint": {
+            "settings": {
+                "slint": {
+                    // "." and "slintcn" resolve from the worktree root; the "../../.." pair resolves from files in examples/gallery/ui.
+                    "includePaths": [".", "slintcn", "../../..", "../../../slintcn"],
+                    "libraryPaths": {
+                        "slintcn": "slintcn"
+                    },
+                    "preview": {
+                        "style": "slintcn"
+                    }
+                }
+            }
+        }
+    }
+}

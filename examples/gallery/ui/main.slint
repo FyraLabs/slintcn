@@ -1,0 +1,151 @@
+import { Button, Palette } from "std-widgets.slint";
+import { Alert, AlertVariant } from "@slintcn/alert.slint";
+import { AlertDialog } from "@slintcn/alert-dialog.slint";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@slintcn/card.slint";
+import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
+
+export component Gallery inherits Window {
+    title: "slintcn gallery";
+    preferred-width: 960px;
+    preferred-height: 640px;
+
+    property <string> last-result;
+
+    VerticalLayout {
+        padding: 32px;
+        spacing: 32px;
+        alignment: start;
+
+        HorizontalLayout {
+            spacing: 8px;
+            alignment: start;
+
+            Button { text: "Button"; }
+            Button { text: "Primary"; primary: true; }
+            Button { text: "Add"; icon: @image-url("icons/plus.svg"); colorize-icon: true; }
+            Button { text: "Disabled"; enabled: false; }
+            Button { text: "Checkable"; checkable: true; }
+            Button { text: "Destructive"; destructive: true; }
+            Button {
+                text: Palette.color-scheme == ColorScheme.dark ? "Light mode" : "Dark mode";
+                clicked => {
+                    Palette.color-scheme = Palette.color-scheme == ColorScheme.dark ? ColorScheme.light : ColorScheme.dark;
+                }
+            }
+        }
+
+        HorizontalLayout {
+            alignment: start;
+
+            Card {
+                width: 360px;
+
+                CardHeader {
+                    CardTitle { text: "Create project"; }
+                    CardDescription { text: "Lorem Ipsum dolor sit amet consectetur adipiscing elit."; }
+                }
+
+                CardContent {
+                    Text { text: "Lorem Ipsum dolor sit amet consectetur adipiscing elit."; }
+                }
+
+
+                CardFooter {
+                    spacing: 8px;
+                    alignment: end;
+
+                    Button { text: "Cancel"; }
+                    Button { text: "Deploy"; primary: true; }
+                }
+            }
+        }
+
+        VerticalLayout {
+            width: 480px;
+            spacing: 16px;
+
+            Alert {
+                icon: @image-url("icons/circle-check.svg");
+                title: "Success! Your changes have been saved";
+                description: "This is an alert with icon, title and description.";
+            }
+
+            Alert {
+                variant: AlertVariant.destructive;
+                icon: @image-url("icons/circle-alert.svg");
+                title: "Unable to process your payment.";
+                description: "Please verify your billing information and try again.";
+            }
+
+            Alert {
+                title: "No icon or description";
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            alignment: start;
+
+            open-dialog := Button {
+                text: "Open dialog";
+                clicked => { edit-dialog.show(); }
+            }
+
+            open-alert-dialog := Button {
+                text: "Delete account";
+                destructive: true;
+                clicked => { delete-dialog.show(); }
+            }
+
+            result := Text {
+                text: root.last-result;
+                vertical-alignment: center;
+            }
+        }
+    }
+
+    Alert {
+        x: parent.width - self.width - 16px;
+        y: parent.height - self.height - 16px;
+        width: 360px;
+        icon: @image-url("icons/circle-check.svg");
+        title: "Event has been created";
+        description: "Sunday, December 03, 2023 at 9:00 AM";
+    }
+
+    edit-dialog := Dialog {
+        title: "Edit profile";
+        description: "Make changes to your profile here. Click save when you're done.";
+        dismissed => { root.last-result = "Edit dialog dismissed"; }
+
+        Text { text: "Dialog content goes here."; }
+
+        DialogFooter {
+            Button {
+                text: "Cancel";
+                clicked => {
+                    edit-dialog.close();
+                    root.last-result = "Edit dialog cancelled";
+                }
+            }
+
+            save-button := Button {
+                text: "Save changes";
+                primary: true;
+                clicked => {
+                    edit-dialog.close();
+                    root.last-result = "Saved";
+                }
+            }
+        }
+    }
+
+    delete-dialog := AlertDialog {
+        title: "Are you absolutely sure?";
+        description: "This action cannot be undone. This will permanently delete your account and remove your data from our servers.";
+        action-text: "Delete account";
+        destructive: true;
+        cancel => { root.last-result = "Delete cancelled"; }
+        action => { root.last-result = "Account deleted"; }
+    }
+}

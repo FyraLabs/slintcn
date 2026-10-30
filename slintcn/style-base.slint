@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SlintcnPalette } from "styling.slint";
+
+export global StyleMetrics {
+    out property <length> layout-spacing: 8px;
+    out property <length> layout-padding: 8px;
+    out property <length> text-cursor-width: 1px;
+    out property <color> window-background: SlintcnPalette.background;
+    out property <color> default-text-color: SlintcnPalette.foreground;
+    out property <color> textedit-background: SlintcnPalette.background;
+    out property <color> textedit-text-color: SlintcnPalette.foreground;
+    out property <color> textedit-background-disabled: SlintcnPalette.muted;
+    out property <color> textedit-text-color-disabled: SlintcnPalette.muted-foreground;
+    out property <bool> dark-color-scheme: SlintcnPalette.color-scheme == ColorScheme.dark;
+}
+
+export global Palette {
+    in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+
+    out property <brush> background: SlintcnPalette.background;
+    out property <brush> foreground: SlintcnPalette.foreground;
+    out property <brush> alternate-background: SlintcnPalette.muted;
+    out property <brush> alternate-foreground: SlintcnPalette.foreground;
+    out property <brush> control-background: SlintcnPalette.secondary;
+    out property <brush> control-foreground: SlintcnPalette.secondary-foreground;
+    out property <brush> accent-background: SlintcnPalette.primary;
+    out property <brush> accent-foreground: SlintcnPalette.primary-foreground;
+    out property <brush> selection-background: SlintcnPalette.primary;
+    out property <brush> selection-foreground: SlintcnPalette.primary-foreground;
+    out property <brush> border: SlintcnPalette.border;
+}

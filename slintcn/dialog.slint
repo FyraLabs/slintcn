@@ -1,0 +1,156 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Icons, SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export component DialogFooter inherits HorizontalLayout {
+    alignment: end;
+    spacing: 8px;
+}
+
+export component Dialog {
+    in property <string> title;
+    in property <string> description;
+    in property <bool> show-close-button: true;
+    in property <bool> dismiss-on-outside-click: true;
+    out property <bool> is-open: i-popup.is-open;
+
+    width: 100%;
+    height: 100%;
+
+    // Escape, outside click, or the close button
+    callback dismissed();
+
+    property <bool> closing;
+
+    public function show() {
+        i-close-timer.running = false;
+        root.closing = false;
+        i-popup.show();
+    }
+
+    public function close() {
+        if i-popup.is-open && !root.closing {
+            root.closing = true;
+            i-close-timer.running = true;
+        }
+    }
+
+    function dismiss() {
+        root.close();
+        root.dismissed();
+    }
+
+    i-close-timer := Timer {
+        interval: 200ms;
+        running: false;
+        triggered => {
+            self.running = false;
+            i-popup.close();
+            root.closing = false;
+        }
+    }
+
+    i-popup := PopupWindow {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        close-policy: no-auto-close;
+
+        i-focus-scope := FocusScope {
+            property <bool> entered;
+            property <bool> visible-state: self.entered && !root.closing;
+
+            init => {
+                self.focus();
+                self.entered = true;
+            }
+
+            key-pressed(event) => {
+                if event.text == Key.Escape {
+                    root.dismiss();
+                    return accept;
+                }
+                return reject;
+            }
+
+            Rectangle {
+                background: #00000080;
+                opacity: i-focus-scope.visible-state ? 1 : 0;
+                animate opacity { duration: 200ms; }
+
+                TouchArea {
+                    clicked => {
+                        if root.dismiss-on-outside-click {
+                            root.dismiss();
+                        }
+                    }
+                }
+            }
+
+            i-panel := Rectangle {
+                width: min(512px, root.width - 32px);
+                height: i-panel-layout.preferred-height;
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                background: SlintcnPalette.background;
+                border-radius: SlintcnSizeSettings.radius-lg;
+                border-width: 1px;
+                border-color: SlintcnPalette.border;
+                drop-shadow-offset-y: 10px;
+                drop-shadow-blur: 15px;
+                drop-shadow-color: #0000001a;
+                opacity: i-focus-scope.visible-state ? 1 : 0;
+                transform-scale: i-focus-scope.visible-state ? 1 : 0.95;
+                animate opacity, transform-scale { duration: 200ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+
+                TouchArea {}
+
+                i-panel-layout := VerticalLayout {
+                    padding: 24px;
+                    spacing: 16px;
+
+                    if root.title != "" || root.description != "": VerticalLayout {
+                        spacing: 8px;
+
+                        if root.title != "": Text {
+                            text: root.title;
+                            color: SlintcnPalette.foreground;
+                            font-size: 18px;
+                            font-weight: 600;
+                            wrap: word-wrap;
+                        }
+
+                        if root.description != "": Text {
+                            text: root.description;
+                            color: SlintcnPalette.muted-foreground;
+                            font-size: 14px;
+                            wrap: word-wrap;
+                        }
+                    }
+
+                    @children
+                }
+
+                if root.show-close-button: i-close := TouchArea {
+                    x: parent.width - self.width - 16px;
+                    y: 16px;
+                    width: 16px;
+                    height: 16px;
+                    mouse-cursor: pointer;
+                    accessible-role: button;
+                    accessible-label: "Close";
+                    accessible-action-default => { root.dismiss(); }
+                    clicked => { root.dismiss(); }
+
+                    Image {
+                        source: Icons.x;
+                        colorize: SlintcnPalette.foreground;
+                        opacity: i-close.has-hover ? 1 : 0.7;
+                        animate opacity { duration: 150ms; }
+                    }
+                }
+            }
+        }
+    }
+}
