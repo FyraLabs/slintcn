@@ -14,3 +14,15 @@ export global ComponentPalette {
     out property <brush> border: Palette.border;
     out property <color> destructive: dark ? #ff6467 : #e7000b;
 }
+
+export global ComponentSizeSettings {
+    out property <length> radius: 10px;
+    out property <length> radius-sm: radius - 4px;
+    out property <length> radius-md: radius - 2px;
+    out property <length> radius-lg: radius;
+    out property <length> radius-xl: radius + 4px;
+}
+
+export global ComponentIcons {
+    out property <image> x: @image-url("_x.svg");
+}

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { Icons, SlintcnSizeSettings } from "../styling.slint";
-import { ComponentPalette } from "palette.slint";
+import { ComponentIcons, ComponentPalette, ComponentSizeSettings } from "styling.slint";
 
 export component DialogFooter inherits HorizontalLayout {
     alignment: end;
@@ -95,7 +94,7 @@ export component Dialog {
                 x: (parent.width - self.width) / 2;
                 y: (parent.height - self.height) / 2;
                 background: ComponentPalette.background;
-                border-radius: SlintcnSizeSettings.radius-lg;
+                border-radius: ComponentSizeSettings.radius-lg;
                 border-width: 1px;
                 border-color: ComponentPalette.border;
                 drop-shadow-offset-y: 10px;
@@ -145,7 +144,7 @@ export component Dialog {
                     clicked => { root.dismiss(); }
 
                     Image {
-                        source: Icons.x;
+                        source: ComponentIcons.x;
                         colorize: ComponentPalette.foreground;
                         opacity: i-close.has-hover ? 1 : 0.7;
                         animate opacity { duration: 150ms; }

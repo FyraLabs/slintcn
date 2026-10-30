@@ -1,146 +1,139 @@
 # Hacking on slintcn
 
-This covers how slintcn is put together and how to add components. For using slintcn in an app, see [README.md](README.md).
+This explains how slintcn works internally. For using it in an app, see the [README](README.md).
 
-## Layout
+slintcn has two halves that are developed together but used independently:
 
-```
-slintcn/                  the style and extras; this folder is what users copy
-  styling.slint           SlintcnPalette (shadcn colors, dark and light) and SlintcnSizeSettings (radii)
-  style-base.slint        StyleMetrics + Palette: Slint's required globals, mapped onto SlintcnPalette
-  std-widgets.slint       the style's entry point: re-exports Palette, StyleMetrics and every standard widget
-  _x.svg, …               icons used by the style (see Icons in styling.slint)
-  std/                    standard widgets (Slint's std-widgets API): button.slint, …
-  components/             extras (imported as @slintcn/components/…): card.slint, alert.slint, dialog.slint, …
-    palette.slint         ComponentPalette: the extras' colors, taken from the active style's Palette
-examples/gallery/         Rust app that uses slintcn/ the way a user's app would
-  build.rs                selects the slintcn style, include paths and @slintcn library path
-  ui/main.slint           the gallery window
-.zed/, .vscode/           editor settings for the Slint language server
-```
+- `src/components/` is a library of components Slint doesn't ship (Card, Alert, Dialog, …). Apps import them as `@slintcn/card.slint`. They work under any widget style.
+- `src/styles/slintcn/` is a Slint widget style that gives Slint's own standard widgets the shadcn look. It doubles as the starting point for anyone writing their own style.
 
-## How it fits together
+The rule that keeps them independent: components never import anything from `src/styles/`.
 
-```
-styling.slint ──► style-base.slint ──► std-widgets.slint ──► app: import { Button } from "std-widgets.slint"
-      │                                       ▲
-      ├──────────────────────────────► std/button.slint, …
-      └──► components/card.slint, … ──────────────────────► app: import { Card } from "@slintcn/components/card.slint"
-```
-
-The files follow the layout of Slint's built-in styles (Fluent, Cupertino, Material, Cosmic): style tokens in `styling.slint` as `<Style>Palette` / `<Style>SizeSettings`, mapped onto the required globals in `style-base.slint`.
-
-- **`SlintcnPalette`** holds shadcn's colors under shadcn's names (`primary`, `muted-foreground`, `accent`, `ring`, …), with a dark and a light value for each. It switches on `SlintcnPalette.color-scheme`.
-- **`SlintcnSizeSettings`** holds the radii (`radius-sm`, `radius-md`, `radius-lg`, `radius-xl`), derived from shadcn's `--radius`.
-- **`StyleMetrics`** and **`Palette`** are the globals Slint requires from every style. The compiler loads them from `style-base.slint` by name. `Palette` maps Slint's slots onto `SlintcnPalette`:
-  - `accent-background` → `primary`
-  - `control-background` → `secondary`
-  - `alternate-background` → `card` (Slint uses it for panels, which is what a card is)
-
-  `Palette.color-scheme` is two-way bound to `SlintcnPalette.color-scheme`, so apps switch modes with the standard `Palette.color-scheme`.
-- **Standard widgets (`std/`) read `SlintcnPalette`**, not `Palette`, so they use shadcn's names. Watch out for one clash: Slint's `Palette.accent-foreground` is the text on a primary button, while shadcn's `accent-foreground` is the text on a subtle hover background.
-- **Extras (`components/`) read `ComponentPalette`**, which is built from the *active* style's `Palette`. Under slintcn that's shadcn's colors; under Fluent, Cosmic and so on, extras take that style's colors and follow its dark/light mode. Roles Slint's `Palette` doesn't have are derived: muted text is `foreground` at 60%, and `destructive` is shadcn's red for the current mode.
-- **Files import each other with relative paths** (`import { SlintcnPalette } from "../styling.slint";` from `std/` or `components/`), so the folder works under any style or library name.
-- **`std-widgets.slint`, `style-base.slint` and `styling.slint` stay at the top of the folder.** The compiler looks for the first two by exact path.
-
-### How Slint finds the style
-
-Custom styles aren't in Slint's docs. This is from reading the compiler source (Slint 1.17/1.18):
-
-- `--style slintcn` (or `with_style`, or `SLINT_STYLE`) only checks that `slintcn/std-widgets.slint` exists under some include path.
-- `import … from "std-widgets.slint"` is resolved by searching the include paths for `std-widgets.slint` itself, *before* the built-in styles. So the `slintcn/` folder must also be an include path. That's why there are two: the repo root and `slintcn/`.
-- That also means the include path, not the style name, is what applies slintcn. With `slintcn/` as an include path, `--style fluent` still renders slintcn. To switch styles, drop the `slintcn/` include path too. The gallery's `build.rs` does this based on `SLINT_STYLE`.
-- The compiler loads `Palette` and `StyleMetrics` from `style-base.slint`. If the file is missing, it panics with "can't load style metrics".
-- Relative include paths are resolved from the importing file's folder, not the working directory. Use absolute paths in `build.rs` and on the command line. See the comment in `.zed/settings.json` for the editor workaround.
-- A custom style can't read the system's dark/light setting (built-in styles use `SlintInternal.color-scheme`, which is off-limits). It can't import Slint's built-in files either.
-
-## Running
+`examples/gallery/` is a small Rust app that uses both, the same way a user's app would. Run it with:
 
 ```sh
 cargo run -p slintcn-gallery
-SLINT_STYLE=fluent cargo run -p slintcn-gallery    # same gallery with a built-in style
+SLINT_STYLE=fluent cargo run -p slintcn-gallery   # or cupertino, material, cosmic
 ```
 
-Live preview while editing:
+## How Slint styles work
 
-```sh
-slint-viewer -I "$PWD" -I "$PWD/slintcn" -Lslintcn=slintcn --style slintcn --auto-reload examples/gallery/ui/main.slint
+Slint's standard widgets (`Button`, `LineEdit`, `CheckBox`, …) aren't one set of widgets with a theme on top. Each style, like Fluent or Cupertino, is its own complete implementation of every widget, written in `.slint`. When an app writes `import { Button } from "std-widgets.slint"`, the compiler picks the `std-widgets.slint` of the selected style. That's why you can't restyle Fluent's Button from the outside: its look is in its code, and the colors it exposes through `Palette` are read-only.
+
+So to give the standard widgets a different look, you write a style. Slint doesn't document custom styles, but the compiler supports them. Here's how it actually resolves one, from reading the compiler source (Slint 1.18):
+
+- Selecting a style (`with_style("slintcn")`, `--style slintcn` or `SLINT_STYLE=slintcn`) only checks that some include path contains `slintcn/std-widgets.slint`.
+- `import … from "std-widgets.slint"` is then resolved by searching the include paths for a file named `std-widgets.slint`, before falling back to the built-in styles. So the style folder itself also has to be an include path.
+- In other words, the include path is what actually applies a custom style, not its name. If `src/styles/slintcn/` is an include path, you get slintcn even with `--style fluent`. The gallery's `build.rs` handles this by only adding include paths when `src/styles/<SLINT_STYLE>/` exists.
+- The compiler separately loads `Palette` and `StyleMetrics` from a file called `style-base.slint`. Without it, compilation panics with "can't load style metrics".
+- Relative include paths are resolved from the folder of the file doing the import, not from the working directory. Use absolute paths in `build.rs` and on the command line. Editor settings, which can't use absolute paths if they're to be shared, need one relative entry per folder; see the comment in `.zed/settings.json`.
+- A custom style can't import Slint's built-in files, and it can't read the system's dark/light setting. The built-in styles use an internal global for that which isn't accessible from outside.
+
+Because this is undocumented, check it again whenever we upgrade Slint.
+
+## The slintcn style
+
+```
+src/styles/slintcn/
+  styling.slint       SlintcnPalette, SlintcnSizeSettings
+  style-base.slint    StyleMetrics, Palette
+  std-widgets.slint   the style's exports
+  std/button.slint    …one file per standard widget
 ```
 
-Screenshot, e.g. to check a change without a window:
+This follows the layout of Slint's built-in styles. `styling.slint` holds the style's own design tokens. `SlintcnPalette` has shadcn's colors under shadcn's names (`primary`, `muted-foreground`, `ring`, …), each with a dark and a light value, switching on `SlintcnPalette.color-scheme`. `SlintcnSizeSettings` has the radii, derived from shadcn's 10px `--radius`.
 
-```sh
-slint-viewer -I "$PWD" -I "$PWD/slintcn" -Lslintcn=slintcn --style slintcn --screenshot /tmp/gallery.png examples/gallery/ui/main.slint
+`style-base.slint` defines the two globals Slint requires from every style, and fills them in from `SlintcnPalette`. The interesting part is the `Palette` mapping:
+
+| Slint `Palette` | shadcn token |
+|---|---|
+| `background`, `foreground` | `background`, `foreground` |
+| `alternate-background`, `alternate-foreground` | `card`, `card-foreground` |
+| `control-background`, `control-foreground` | `secondary`, `secondary-foreground` |
+| `accent-background`, `accent-foreground` | `primary`, `primary-foreground` |
+| `selection-background`, `selection-foreground` | `primary`, `primary-foreground` |
+| `border` | `border` |
+
+`Palette.color-scheme` is two-way bound to `SlintcnPalette.color-scheme`, so apps switch between dark and light with the standard `Palette.color-scheme`, as with any other style.
+
+Beware the naming clash: Slint's `accent-*` means the primary color, while shadcn's `accent` is a subtle hover background. That's why the widgets in `std/` use `SlintcnPalette` directly rather than `Palette`.
+
+`std-widgets.slint` is the list of what the style provides. Every widget in `std/` is exported from there and nowhere else. Apps never import `std/button.slint` directly, and the widgets have exactly the API Slint documents, with nothing extra. That's what lets an app switch between slintcn and Fluent without changing code.
+
+`std-widgets.slint` and `style-base.slint` have to stay at the top of the style folder, since the compiler looks for them by name.
+
+## The components
+
+```
+src/components/
+  styling.slint       ComponentPalette, ComponentSizeSettings, ComponentIcons
+  _x.svg              …icons
+  card.slint, alert.slint, dialog.slint, alert-dialog.slint, …
 ```
 
-Use the same Slint version for the tools (`cargo install slint-lsp slint-viewer`) and the gallery's `slint` crate, so the editor and the build agree.
+Components have to look right under any style, so they take their colors from whichever style is active. `ComponentPalette` in `src/components/styling.slint` imports `Palette` from `"std-widgets.slint"`. That import is resolved like an app's import, so it gets the active style's `Palette`, and the component colors follow it:
 
-## Adding a standard widget
+- `background`, `foreground` and `border` come straight from `Palette`.
+- `card` is `Palette.alternate-background`, Slint's slot for panels. Under slintcn that's shadcn's `card`.
+- Roles Slint has no slot for are derived: muted text is `foreground` at 60% opacity, and `destructive` is shadcn's red for the current mode.
 
-Standard widgets are the ones in Slint's `std-widgets.slint` (`CheckBox`, `LineEdit`, `Switch`, `Slider`, …).
+So under slintcn the components look like shadcn, and under Cosmic they look like Cosmic panels, in either mode.
 
-1. **Copy the API from Slint's docs, exactly.** Same property names, types, directions (`in` / `out` / `in-out`), defaults and callbacks. Apps must compile unchanged when they switch between slintcn and `fluent`. Docs: `https://docs.slint.dev/latest/docs/slint/reference/std-widgets/`. Fluent's source shows the directions the docs leave out.
-2. **Take the look from shadcn's source**, not from memory: `apps/v4/registry/new-york-v4/ui/<name>.tsx` in [shadcn-ui/ui](https://github.com/shadcn-ui/ui). Translate the Tailwind classes:
-   - `h-9` = 36px, and so on: spacing is 4px per step
-   - `text-sm` = 14px, `font-medium` = 500, `font-semibold` = 600
-   - `rounded-md` = `SlintcnSizeSettings.radius-md`
-   - `bg-primary/90` = `SlintcnPalette.primary.transparentize(0.1)`
-   - `dark:` classes become `dark ? … : …`
-3. **Look at how Fluent builds it** (`internal/compiler/widgets/fluent/<name>.slint` in [slint-ui/slint](https://github.com/slint-ui/slint), at the tag matching our Slint version) for structure, accessibility properties and keyboard handling. Don't copy code from it: Fluent is `GPL-3.0-only OR` Slint's commercial licenses, which isn't compatible with our `GPL-3.0-or-later`.
-4. **Write `slintcn/std/<name>.slint`** following the [conventions](#conventions). Import tokens with `import { SlintcnPalette } from "../styling.slint";`.
-5. **Export it** from `slintcn/std-widgets.slint`: `export { CheckBox } from "std/checkbox.slint";`
-6. **Add it to the gallery** (`examples/gallery/ui/main.slint`), covering each state: default, disabled, checked, with an icon, and so on.
-7. **[Check it](#checking-a-component).**
-8. **Update the component table** in README.md.
+Components that need a standard widget import it from `"std-widgets.slint"` too. AlertDialog's buttons are slintcn buttons under slintcn and Fluent buttons under Fluent.
 
-## Adding an extra
+## Writing a standard widget
 
-Extras are shadcn components that Slint's standard set doesn't have (Badge, Alert, Dialog, …).
+The API comes from [Slint's docs](https://docs.slint.dev/latest/docs/slint/reference/std-widgets/) and must match exactly: property names, types, `in`/`out`/`in-out`, defaults and callbacks. The docs don't always say whether a property is `in` or `in-out`. Fluent's source (`internal/compiler/widgets/fluent/` in [slint-ui/slint](https://github.com/slint-ui/slint)) does, and it's the best reference for how a widget is structured, how it handles keyboard input and which accessibility properties it sets. Read it, but don't copy from it: it's licensed `GPL-3.0-only` or Slint's commercial licenses, which isn't compatible with our `GPL-3.0-or-later`.
 
-1. Take the look and the part structure from shadcn's `<name>.tsx`. Mirror its exported parts where Slint allows it (`Card`, `CardHeader`, `CardTitle`, …).
-2. Pick the API yourself, staying close to shadcn's names (e.g. `variant` as an enum) and consistent with the standard widgets (`enabled`, not `disabled`).
-3. Write `slintcn/components/<name>.slint`. Don't export it from `std-widgets.slint`; apps import it from `@slintcn/components/<name>.slint`. If it needs a standard widget, import it from `../std/<name>.slint`.
-4. Add it to the gallery, check it, and update README.md.
+The look comes from shadcn's source, `apps/v4/registry/new-york-v4/ui/<name>.tsx` in [shadcn-ui/ui](https://github.com/shadcn-ui/ui). Translating Tailwind is mostly mechanical: spacing is 4px per step (`h-9` is 36px), `text-sm` is 14px, `font-medium` is weight 500, `rounded-md` is `SlintcnSizeSettings.radius-md`, `bg-primary/90` is `SlintcnPalette.primary.transparentize(0.1)`, and `dark:` variants become a `dark ? … : …` expression.
+
+Put the widget in `std/`, export it from `std-widgets.slint`, and add it to the gallery.
+
+## Writing a component
+
+Here the API is ours to design. Keep shadcn's names and part structure where Slint allows it (`Card`, `CardHeader`, `CardTitle`, …), and match the standard widgets' conventions (`enabled`, not `disabled`). Slint has no equivalent of React context, so a part can't read its parent's props. When a variant has to affect several parts, like Alert's destructive variant recoloring its title and description, use properties on the main component instead of separate parts.
+
+Colors come from `ComponentPalette` and sizes from `ComponentSizeSettings`. If a component needs a color role that isn't there yet, add it to `ComponentPalette` as something derived from `Palette`, so it still works under every style.
 
 ## Conventions
 
-- Standard widgets have exactly Slint's API, with no extra properties, and apps only reach them through `std-widgets.slint`. The files in `std/` are how the style draws them, not separate components. Something that needs more than the standard API (a destructive button, say) is an extra with its own name.
-- Start every `.slint` file with `// SPDX-License-Identifier: GPL-3.0-or-later`. Users copy single files, so each one carries its license.
-- Colors come from `SlintcnPalette` in `std/` and from `ComponentPalette` in `components/`; radii come from `SlintcnSizeSettings`. Don't hard-code hex values in components; add a token in `styling.slint` (or `components/palette.slint`) instead. Shadows (which shadcn doesn't theme) are the exception.
-- Don't make a component inherit `Rectangle` unless app code should be able to change its `background`, `border-radius`, and so on. Put the `Rectangle` inside instead. `Button` and `Card` do this.
-- Size from content: `min-width: max(36px, i-layout.min-width);`, with `horizontal-stretch: 0` for controls.
-- Name internal elements with an `i-` prefix (`i-background`, `i-touch-area`), like Slint's own widgets.
-- Keep the `accessible-*` properties: role, label, enabled, checked, and the default action.
-- **Focus rings:** shadcn shows them on keyboard focus only (`:focus-visible`), which Slint doesn't have. Track it in the `FocusScope`:
+- Every `.slint` file starts with `// SPDX-License-Identifier: GPL-3.0-or-later`. Users copy individual files, so each one carries its license.
+- No hex colors in widgets or components; add a token to the relevant `styling.slint`. Shadows are the exception, since shadcn doesn't theme them either.
+- Don't inherit `Rectangle` unless app code is meant to change the background or radius. Put a `Rectangle` inside instead.
+- Internal element ids start with `i-` (`i-background`, `i-touch-area`), like in Slint's own widgets.
+- Controls size themselves from their content (`min-width: max(36px, i-layout.min-width)`) and don't stretch (`horizontal-stretch: 0`).
+- Keep the `accessible-*` properties.
+- shadcn shows focus rings only for keyboard focus. Slint has no `:focus-visible`, so track it from the `FocusScope`'s `focus-gained(reason)`: set a flag when the reason is `tab-navigation`, and draw the ring only while focused with that flag set. `std/button.slint` shows how.
+- Transitions are 150ms with `cubic-bezier(0.4, 0, 0.2, 1)`, like Tailwind's default.
+- Comments are one line, and only where the code can't explain itself.
 
-  ```slint
-  focus-gained(reason) => {
-      if reason != FocusReason.window-activation {
-          root.keyboard-focus = reason == FocusReason.tab-navigation;
-      }
-  }
-  ```
+## Checking your work
 
-  Draw the ring (3px, `SlintcnPalette.ring.transparentize(0.5)`, no offset) only when `has-focus && keyboard-focus`.
-- Transitions: `animate background, border-color { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }`.
-- Comments are one line at most, and only where the code can't explain itself.
+The viewer is the fastest loop. With `--auto-reload` it re-renders on every save:
 
-## Checking a component
+```sh
+slint-viewer -I "$PWD/src/styles" -I "$PWD/src/styles/slintcn" -Lslintcn=src/components --style slintcn --auto-reload examples/gallery/ui/main.slint
+```
 
-- **Compiles:** `slint-viewer --check` with the flags from [Running](#running), and `cargo build`.
-- **Looks right in both modes:** take a screenshot in dark mode, then in light. To render light mode, temporarily add `init => { Palette.color-scheme = ColorScheme.light; }` to the window. Compare against ui.shadcn.com side by side.
-- **Interactions:** run the gallery and try hover, press, disabled, Tab focus (ring shows) versus a click (no ring), and Space/Enter.
-- **API matches Slint's** (standard widgets only): the gallery must also build with a built-in style. Leave out the `slintcn/` include path, or it will still use slintcn:
+Replace `--auto-reload` with `--check` to only compile, or with `--screenshot out.png` to render to a file. To see light mode in a screenshot, temporarily add `init => { Palette.color-scheme = ColorScheme.light; }` to the gallery window.
+
+Before calling something done:
+
+- Compare it side by side with ui.shadcn.com, in dark and light mode.
+- Run the gallery and try it by hand: hover, press, disabled, Tab focus (ring) versus clicking (no ring), Space and Enter.
+- Check that it still works under the stock styles. This catches standard widgets drifting from Slint's API and components that accidentally depend on slintcn. Leave out the slintcn include paths, or you'll still be testing slintcn:
 
   ```sh
+  for s in fluent cupertino material cosmic; do slint-viewer -Lslintcn=src/components --style $s --check examples/gallery/ui/main.slint; done
   SLINT_STYLE=fluent cargo build -p slintcn-gallery
-  slint-viewer -I "$PWD" -Lslintcn=slintcn --style fluent --check examples/gallery/ui/main.slint
   ```
+
+Keep `slint-viewer` and `slint-lsp` on the same Slint version as the gallery's `slint` crate (`cargo install slint-viewer slint-lsp`), so the editor, the viewer and the build agree.
 
 ## Known gaps
 
-- Only shadcn's neutral base color. Zinc, slate and stone are still to do.
-- The compiler builds tooltips, `TabWidget`, `RadioGroup` and menus from extra parts of a style (`std-widgets-impl.slint` in built-in styles). What a custom style needs to provide for those is untested.
-- Shared standard pieces (`VerticalBox`, `HorizontalBox`, `GridBox`, `ListView`, `StandardButton`, …) have to be written from scratch, because a custom style can't import Slint's built-in files.
-- The style doesn't set a default font size, so plain `Text` uses the platform default.
-- Slint 1.19 adds `slint-project.json`, which should replace most of the include and library path setup.
+- Only shadcn's neutral base color exists. Zinc, slate and stone are still to do.
+- The compiler builds tooltips, `TabWidget`, `RadioGroup` and menus from extra parts of a style (built-in styles have a `std-widgets-impl.slint` for this). We don't know yet what a custom style needs to provide for those.
+- Widgets the built-in styles share (`VerticalBox`, `HorizontalBox`, `GridBox`, `ListView`, `StandardButton`, …) have to be rewritten, because a custom style can't import Slint's built-in files.
+- The slintcn style doesn't set a default font size, so plain `Text` uses the platform default.
+- The slintcn style starts in dark mode and can't follow the system setting by itself (see above).

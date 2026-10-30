@@ -3,10 +3,10 @@
         "slint": {
             "settings": {
                 "slint": {
-                    // "." and "slintcn" resolve from the worktree root; the "../../.." pair resolves from files in examples/gallery/ui.
-                    "includePaths": [".", "slintcn", "../../..", "../../../slintcn"],
+                    // Relative include paths resolve from the importing file's folder: "src/styles…" for the compiler's own lookups from the worktree root, then one entry per folder whose files import std-widgets.slint.
+                    "includePaths": ["src/styles", "src/styles/slintcn", "../styles/slintcn", "../../../src/styles/slintcn"],
                     "libraryPaths": {
-                        "slintcn": "slintcn"
+                        "slintcn": "src/components"
                     },
                     "preview": {
                         "style": "slintcn"

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { SlintcnSizeSettings } from "../styling.slint";
-import { ComponentPalette } from "palette.slint";
+import { ComponentPalette, ComponentSizeSettings } from "styling.slint";
 
 export component Card {
     Rectangle {
         background: ComponentPalette.card;
-        border-radius: SlintcnSizeSettings.radius-xl;
+        border-radius: ComponentSizeSettings.radius-xl;
         border-width: 1px;
         border-color: ComponentPalette.border;
         drop-shadow-offset-y: 1px;

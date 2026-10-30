@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { SlintcnSizeSettings } from "../styling.slint";
-import { ComponentPalette } from "palette.slint";
+import { ComponentPalette, ComponentSizeSettings } from "styling.slint";
 
 export enum AlertVariant {
     default,
@@ -24,7 +23,7 @@ export component Alert {
 
     Rectangle {
         background: ComponentPalette.card;
-        border-radius: SlintcnSizeSettings.radius-lg;
+        border-radius: ComponentSizeSettings.radius-lg;
         border-width: 1px;
         border-color: ComponentPalette.border;
     }
