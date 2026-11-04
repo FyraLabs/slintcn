@@ -45,7 +45,7 @@ export component Input {
             input-type: root.input-type == InputType.password && root.password-visible ? InputType.text : root.input-type;
             vertical-alignment: center;
             font-size: 14px;
-            color: SlintcnPalette.foreground;
+            color: SlintcnPalette.foreground.transparentize(root.enabled ? 0 : 0.5);
             accessible-label: root.accessible-label;
             accessible-description: root.accessible-description;
 
@@ -59,7 +59,7 @@ export component Input {
             width: i-text-input.width;
             height: i-text-input.height;
             text: root.placeholder-text;
-            color: SlintcnPalette.muted-foreground;
+            color: SlintcnPalette.muted-foreground.transparentize(root.enabled ? 0 : 0.5);
             font-size: 14px;
             vertical-alignment: center;
         }
