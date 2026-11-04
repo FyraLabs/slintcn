@@ -1,0 +1,79 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+import { Button, ButtonVariant } from "button.slint";
+
+
+// input component
+export component Input {
+    in-out property <string> text <=> i-text-input.text;
+    in property <string> placeholder-text;
+    in property <bool> enabled <=> i-text-input.enabled;
+    in property <bool> read-only <=> i-text-input.read-only;
+    in property <InputType> input-type;
+    in property <InputMethodHints> input-method-hints: {
+        capitalization: root.input-type == InputType.password ? CapitalizationMode.none : CapitalizationMode.sentences,
+        auto-correct: root.input-type != InputType.password,
+        auto-complete: root.input-type != InputType.password,
+    };
+    in-out property <bool> password-visible: false;
+    in property <bool> invalid;
+    out property <bool> has-focus: i-text-input.has-focus;
+
+
+    callback edited(text: string);
+    callback accepted(text: string);
+
+    min-width: 80px;
+    min-height: 36px;
+    max-height: 36px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    i-background := Rectangle {
+        border-radius: SlintcnSizeSettings.radius-md;
+        border-width: 1px;
+        border-color: SlintcnPalette.input;
+        background: transparent;
+        clip: true;
+
+        HorizontalLayout {
+            padding-left: 12px;
+            padding-right: root.input-type == InputType.password ? 72px : 12px;
+
+            Rectangle {
+                i-text-input := TextInput {
+                    width: 100%;
+                    height: 100%;
+                    single-line: true;
+                    input-method-hints: root.input-method-hints;
+                    input-type: root.input-type == InputType.password && root.password-visible ? InputType.text : root.input-type;
+                    vertical-alignment: center;
+                    font-size: 14px;
+                    color: SlintcnPalette.foreground;
+
+                    edited => { root.edited(self.text); }
+                    accepted => { root.accepted(self.text); }
+                }
+
+                if root.text == "" && root.placeholder-text != "": Text {
+                    width: 100%;
+                    height: 100%;
+                    text: root.placeholder-text;
+                    color: SlintcnPalette.muted-foreground;
+                    font-size: 14px;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        if root.input-type == InputType.password: Button {
+            x: parent.width - self.width - 4px;
+            y: (parent.height - self.height) / 2;
+            width: 64px;
+            text: root.password-visible ? "Hide" : "Show";
+            variant: ButtonVariant.ghost;
+            enabled: root.enabled;
+            clicked => { root.password-visible = !root.password-visible; }
+        }
+    }
+}

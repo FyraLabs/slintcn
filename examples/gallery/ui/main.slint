@@ -3,6 +3,7 @@ import { AlertDialog } from "@slintcn/alert-dialog.slint";
 import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@slintcn/card.slint";
 import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
+import { Input } from "@slintcn/input.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
 
 export component Gallery inherits Window {
@@ -48,6 +49,17 @@ export component Gallery inherits Window {
                     SlintcnPalette.color-scheme = SlintcnPalette.color-scheme == ColorScheme.dark ? ColorScheme.light : ColorScheme.dark;
                 }
             }
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            alignment: start;
+
+            Input { width: 180px; placeholder-text: "Email"; }
+            Input { width: 180px; text: "hello@fyralabs.com"; }
+            Input { width: 180px; text: "hunter2"; input-type: InputType.password; }
+            Input { width: 180px; placeholder-text: "Disabled"; enabled: false; }
+            Input { width: 180px; text: "not-an-email"; invalid: true; }
         }
 
         HorizontalLayout {
