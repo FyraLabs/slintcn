@@ -1,0 +1,276 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Checkbox } from "@slintcn/checkbox.slint";
+import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldLegendVariant, FieldOrientation, FieldSeparator, FieldSet, FieldTitle } from "@slintcn/field.slint";
+import { Input } from "@slintcn/input.slint";
+import { SlintcnPalette } from "@slintcn/styling.slint";
+import { Switch } from "@slintcn/switch.slint";
+
+export component FieldExamples inherits VerticalLayout {
+    callback changed(string);
+    spacing: 32px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    FieldSet {
+        spacing: 12px;
+        accessible-label: profile-legend.text;
+
+        profile-legend := FieldLegend { text: "Profile"; }
+        FieldDescription { text: "Manage your account details."; }
+
+        profile-group := FieldGroup {
+            display-name-field := Field {
+                accessible-label: display-name-label.text;
+
+                display-name-label := FieldLabel {
+                    text: "Display name";
+                    clicked => { display-name.focus(); }
+                }
+                display-name := Input {
+                    placeholder-text: "Your name";
+                    accessible-label: display-name-label.text;
+                    accessible-description: display-name-description.text;
+                    edited(text) => { root.changed("Display name: " + text); }
+                }
+                display-name-description := FieldDescription { text: "This is how your name appears to others."; }
+            }
+
+            Field {
+                accessible-label: password-label.text;
+
+                password-label := FieldLabel {
+                    text: "Password";
+                    clicked => { password.focus(); }
+                }
+                password := Input {
+                    text: "hunter2";
+                    input-type: InputType.password;
+                    accessible-label: password-label.text;
+                    accessible-description: password-description.text;
+                }
+                password-description := FieldDescription { text: "Use a strong, unique password."; }
+            }
+
+            email-field := Field {
+                invalid: true;
+                accessible-label: email-label.text;
+
+                email-label := FieldLabel {
+                    text: "Email";
+                    invalid: email-field.invalid;
+                    clicked => { email.focus(); }
+                }
+                email := Input {
+                    text: "not-an-email";
+                    invalid: email-field.invalid;
+                    accessible-label: email-label.text;
+                    accessible-description: email-error.text;
+                }
+                email-error := FieldError { text: "Enter a valid email address."; }
+            }
+
+            disabled-field := Field {
+                enabled: false;
+                accessible-label: disabled-label.text;
+
+                disabled-label := FieldLabel {
+                    text: "Organization";
+                    enabled: disabled-field.enabled;
+                    clicked => { organization.focus(); }
+                }
+                organization := Input {
+                    text: "Fyra Labs";
+                    enabled: disabled-field.enabled;
+                    accessible-label: disabled-label.text;
+                }
+            }
+
+            responsive-field := Field {
+                orientation: FieldOrientation.responsive;
+                responsive-width: profile-group.width;
+                accessible-label: responsive-label.text;
+
+                responsive-label := FieldLabel {
+                    text: "Username";
+                    clicked => { username.focus(); }
+                }
+                username := Input {
+                    placeholder-text: "Choose a username";
+                    accessible-label: responsive-label.text;
+                }
+            }
+        }
+    }
+
+    FieldSet {
+        spacing: 12px;
+        accessible-label: preferences-legend.text;
+
+        preferences-legend := FieldLegend {
+            text: "Preferences";
+            variant: FieldLegendVariant.label;
+        }
+
+        FieldGroup {
+            Field {
+                orientation: FieldOrientation.horizontal;
+                cross-axis-alignment: start;
+                accessible-label: sharing-label.text;
+
+                FieldContent {
+                    sharing-label := FieldLabel {
+                        text: "Share across devices";
+                        clicked => {
+                            sharing.focus();
+                            sharing.accessible-action-default();
+                        }
+                    }
+                    sharing-description := FieldDescription {
+                        text: "Focus is shared across devices and turns off when you leave the app.";
+                    }
+                }
+                sharing := Switch {
+                    accessible-label: sharing-label.text;
+                    accessible-description: sharing-description.text;
+                    toggled(checked) => { root.changed(checked ? "Sharing enabled" : "Sharing disabled"); }
+                }
+            }
+
+            FieldSeparator {}
+
+            Field {
+                orientation: FieldOrientation.horizontal;
+                accessible-label: notifications-label.text;
+
+                notifications := Switch {
+                    checked: true;
+                    accessible-label: notifications-label.text;
+                }
+                notifications-label := FieldLabel {
+                    text: "Enable notifications";
+                    clicked => {
+                        notifications.focus();
+                        notifications.accessible-action-default();
+                    }
+                }
+            }
+
+            FieldSeparator { text: "Privacy"; }
+
+            Field {
+                orientation: FieldOrientation.horizontal;
+                cross-axis-alignment: start;
+                accessible-label: terms-label.text;
+
+                terms := Checkbox {
+                    accessible-label: terms-label.text;
+                    accessible-description: terms-description.text;
+                    toggled(checked) => { root.changed(checked ? "Terms accepted" : "Terms unchecked"); }
+                }
+                FieldContent {
+                    terms-label := FieldLabel {
+                        text: "Accept terms and conditions";
+                        clicked => {
+                            terms.focus();
+                            terms.accessible-action-default();
+                        }
+                    }
+                    terms-description := FieldDescription {
+                        text: "By clicking this checkbox, you agree to the terms and conditions.";
+                    }
+                }
+            }
+        }
+    }
+
+    FieldSet {
+        spacing: 12px;
+        accessible-label: choices-legend.text;
+
+        choices-legend := FieldLegend { text: "Choice cards"; }
+
+        FieldGroup {
+            choice-label := FieldLabel {
+                bordered: true;
+                selected: choice.checked;
+                clicked => {
+                    choice.focus();
+                    choice.accessible-action-default();
+                }
+
+                Field {
+                    orientation: FieldOrientation.horizontal;
+                    cross-axis-alignment: start;
+                    accessible-label: choice-title.text;
+
+                    choice := Checkbox {
+                        checked: true;
+                        accessible-label: choice-title.text;
+                        accessible-description: choice-description.text;
+                        toggled(checked) => { root.changed(checked ? "Notifications enabled" : "Notifications disabled"); }
+                    }
+                    FieldContent {
+                        choice-title := FieldTitle { text: "Enable notifications"; }
+                        choice-description := FieldDescription {
+                            text: "You can enable or disable notifications at any time.";
+                        }
+                    }
+                }
+            }
+
+            disabled-choice-label := FieldLabel {
+                bordered: true;
+                enabled: false;
+                selected: disabled-choice.checked;
+                clicked => {
+                    disabled-choice.focus();
+                    disabled-choice.accessible-action-default();
+                }
+
+                Field {
+                    orientation: FieldOrientation.horizontal;
+                    cross-axis-alignment: start;
+                    enabled: disabled-choice-label.enabled;
+                    accessible-label: disabled-choice-title.text;
+
+                    disabled-choice := Switch {
+                        checked: true;
+                        enabled: disabled-choice-label.enabled;
+                        accessible-label: disabled-choice-title.text;
+                        accessible-description: disabled-choice-description.text;
+                    }
+                    FieldContent {
+                        disabled-choice-title := FieldTitle {
+                            text: "Managed preference";
+                            enabled: disabled-choice-label.enabled;
+                        }
+                        disabled-choice-description := FieldDescription {
+                            text: "Your administrator controls this setting.";
+                            enabled: disabled-choice-label.enabled;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    FieldError {
+        text: "• Password must have at least eight characters.\n• Password must include a number.";
+    }
+}
+
+export component FieldPreview inherits Window {
+    in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+    in property <length> viewport-width: 560px;
+    in property <length> viewport-height: 1380px;
+
+    title: "slintcn fields";
+    width: root.viewport-width;
+    height: root.viewport-height;
+    background: SlintcnPalette.background;
+
+    i-layout := VerticalLayout {
+        padding: 32px;
+        FieldExamples {}
+    }
+}

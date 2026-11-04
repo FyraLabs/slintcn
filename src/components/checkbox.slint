@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { SlintcnPalette } from "styling.slint";
-import { FieldCard, FieldCardContent } from "_field-card.slint";
 
 export component Checkbox {
     in-out property <bool> checked;
@@ -97,54 +96,6 @@ export component Checkbox {
                 return accept;
             }
             return reject;
-        }
-    }
-}
-
-export component CheckboxCard {
-    in property <string> title <=> i-content.title;
-    in property <string> description <=> i-content.description;
-    in-out property <bool> checked <=> i-checkbox.checked;
-    in property <bool> enabled <=> i-checkbox.enabled;
-    in property <bool> invalid <=> i-checkbox.invalid;
-    out property <bool> has-focus: i-checkbox.has-focus;
-
-    callback toggled(checked: bool);
-
-    min-width: 160px;
-    preferred-width: 384px;
-    min-height: i-layout.min-height;
-    preferred-height: i-layout.preferred-height;
-    horizontal-stretch: 1;
-    vertical-stretch: 0;
-    forward-focus: i-checkbox;
-
-    FieldCard {
-        width: 100%;
-        height: 100%;
-        enabled: root.enabled;
-        selected: root.checked;
-        invalid: root.invalid;
-        clicked => {
-            i-checkbox.focus();
-            i-checkbox.accessible-action-default();
-        }
-
-        i-layout := HorizontalLayout {
-            padding: 12px;
-            spacing: 12px;
-            cross-axis-alignment: start;
-
-            i-checkbox := Checkbox {
-                accessible-label: root.title;
-                accessible-description: root.description;
-                toggled(checked) => { root.toggled(checked); }
-            }
-
-            i-content := FieldCardContent {
-                enabled: root.enabled;
-                invalid: root.invalid;
-            }
         }
     }
 }

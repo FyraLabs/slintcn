@@ -1,0 +1,170 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export enum FieldOrientation {
+    vertical,
+    horizontal,
+    responsive,
+}
+
+export enum FieldLegendVariant {
+    legend,
+    label,
+}
+
+export component FieldSet inherits VerticalLayout {
+    spacing: 24px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: groupbox;
+}
+
+export component FieldLegend inherits VerticalLayout {
+    in property <string> text;
+    in property <FieldLegendVariant> variant;
+
+    padding-bottom: 12px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    i-text := Text {
+        text: root.text;
+        font-size: root.variant == FieldLegendVariant.label ? 14px : 16px;
+        font-weight: 500;
+        color: SlintcnPalette.foreground;
+        wrap: word-wrap;
+    }
+}
+
+export component FieldGroup inherits VerticalLayout {
+    spacing: 28px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+}
+
+export component Field inherits FlexboxLayout {
+    in property <FieldOrientation> orientation;
+    in property <length> responsive-width: 0px;
+    in property <bool> enabled: true;
+    in property <bool> invalid;
+
+    private property <bool> horizontal: root.orientation == FieldOrientation.horizontal || (root.orientation == FieldOrientation.responsive && root.responsive-width >= 448px);
+
+    flex-direction: root.horizontal ? row : column;
+    flex-wrap: no-wrap;
+    alignment: root.horizontal ? stretch : start;
+    spacing: 12px;
+    cross-axis-alignment: root.horizontal ? center : stretch;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: groupbox;
+    accessible-enabled: root.enabled;
+}
+
+export component FieldContent inherits VerticalLayout {
+    spacing: 6px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+}
+
+export component FieldTitle inherits Text {
+    in property <bool> enabled: true;
+    in property <bool> invalid;
+
+    font-size: 14px;
+    font-weight: 500;
+    wrap: word-wrap;
+    color: (root.invalid ? SlintcnPalette.destructive : SlintcnPalette.foreground).transparentize(root.enabled ? 0 : 0.5);
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+}
+
+export component FieldLabel {
+    in property <string> text;
+    in property <bool> enabled: true;
+    in property <bool> invalid;
+    in property <bool> bordered;
+    in property <bool> selected;
+    callback clicked;
+
+    private property <bool> dark: SlintcnPalette.color-scheme == ColorScheme.dark;
+
+    horizontal-stretch: root.bordered ? 1 : 0;
+    vertical-stretch: 0;
+
+    Rectangle {
+        border-radius: SlintcnSizeSettings.radius-md;
+        border-width: root.bordered ? 1px : 0px;
+        border-color: root.invalid ? SlintcnPalette.destructive.transparentize(root.dark ? 0.5 : 0) : root.selected ? SlintcnPalette.primary : SlintcnPalette.border;
+        background: root.bordered && root.selected ? SlintcnPalette.primary.transparentize(root.dark ? 0.9 : 0.95) : transparent;
+    }
+
+    i-touch-area := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: root.enabled ? default : not-allowed;
+        clicked => { root.clicked(); }
+    }
+
+    i-layout := FlexboxLayout {
+        flex-direction: root.bordered ? column : row;
+        flex-wrap: no-wrap;
+        cross-axis-alignment: root.bordered ? stretch : center;
+        spacing: 8px;
+        padding: root.bordered ? 16px : 0px;
+
+        if root.text != "": FieldTitle {
+            text: root.text;
+            enabled: root.enabled;
+            invalid: root.invalid;
+        }
+
+        @children
+    }
+}
+
+export component FieldDescription inherits Text {
+    in property <bool> enabled: true;
+
+    font-size: 14px;
+    font-weight: 400;
+    wrap: word-wrap;
+    color: SlintcnPalette.muted-foreground.transparentize(root.enabled ? 0 : 0.5);
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+}
+
+export component FieldSeparator {
+    in property <string> text;
+
+    min-height: 4px;
+    preferred-height: 4px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    Rectangle {
+        y: (parent.height - self.height) / 2;
+        height: 1px;
+        background: SlintcnPalette.border;
+    }
+
+    if root.text != "": Rectangle {
+        width: i-text.preferred-width + 16px;
+        height: i-text.preferred-height;
+        background: SlintcnPalette.background;
+
+        i-text := Text {
+            text: root.text;
+            font-size: 14px;
+            color: SlintcnPalette.muted-foreground;
+        }
+    }
+}
+
+export component FieldError inherits Text {
+    font-size: 14px;
+    color: SlintcnPalette.destructive;
+    wrap: word-wrap;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-live-region: assertive;
+}

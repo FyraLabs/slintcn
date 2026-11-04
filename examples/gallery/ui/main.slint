@@ -4,10 +4,11 @@ import { AlertDialog } from "@slintcn/alert-dialog.slint";
 import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@slintcn/card.slint";
 import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
-import { Input, InputCard } from "@slintcn/input.slint";
+import { Input } from "@slintcn/input.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
-import { Switch, SwitchCard, SwitchSize } from "@slintcn/switch.slint";
-import { Checkbox, CheckboxCard } from "@slintcn/checkbox.slint";
+import { Switch, SwitchSize } from "@slintcn/switch.slint";
+import { Checkbox } from "@slintcn/checkbox.slint";
+import { FieldExamples } from "fields.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -117,57 +118,9 @@ export component Gallery inherits Window {
                 Checkbox { checked: true; invalid: true; accessible-label: "Invalid checked checkbox"; }
             }
 
-            VerticalLayout {
-                width: 384px;
-                spacing: 24px;
-                alignment: start;
-
-                VerticalLayout {
-                    spacing: 12px;
-
-                    InputCard {
-                        title: "Display name";
-                        description: "This is how your name appears to others.";
-                        placeholder-text: "Your name";
-                        edited(text) => { root.last-result = "Display name: " + text; }
-                    }
-                    InputCard {
-                        title: "Password";
-                        description: "Use a strong, unique password.";
-                        text: "hunter2";
-                        input-type: InputType.password;
-                    }
-                }
-
-                VerticalLayout {
-                    spacing: 12px;
-
-                    SwitchCard {
-                        title: "Share across devices";
-                        description: "Focus is shared across devices, and turns off when you leave the app.";
-                        toggled(checked) => { root.last-result = checked ? "Sharing enabled" : "Sharing disabled"; }
-                    }
-                    SwitchCard {
-                        title: "Enable notifications";
-                        description: "Receive notifications when focus mode is enabled or disabled.";
-                        checked: true;
-                    }
-                }
-
-                VerticalLayout {
-                    spacing: 12px;
-
-                    CheckboxCard {
-                        title: "Accept terms and conditions";
-                        description: "By clicking this checkbox, you agree to the terms and conditions.";
-                        toggled(checked) => { root.last-result = checked ? "Terms accepted" : "Terms unchecked"; }
-                    }
-                    CheckboxCard {
-                        title: "Enable notifications";
-                        description: "You can enable or disable notifications at any time.";
-                        checked: true;
-                    }
-                }
+            FieldExamples {
+                width: 480px;
+                changed(message) => { root.last-result = message; }
             }
 
             HorizontalLayout {
