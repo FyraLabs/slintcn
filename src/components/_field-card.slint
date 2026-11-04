@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export component FieldCard {
+    in property <bool> enabled: true;
+    in property <bool> selected;
+    in property <bool> invalid;
+    in property <bool> clickable: true;
+    callback clicked;
+
+    private property <bool> dark: SlintcnPalette.color-scheme == ColorScheme.dark;
+
+    Rectangle {
+        border-radius: SlintcnSizeSettings.radius-md;
+        border-width: 1px;
+        border-color: root.invalid ? SlintcnPalette.destructive.transparentize(root.dark ? 0.5 : 0) : root.selected ? SlintcnPalette.primary.transparentize(root.dark ? 0.8 : 0.7) : SlintcnPalette.border;
+        background: root.enabled && i-touch-area.has-hover ? SlintcnPalette.muted.transparentize(0.5) : root.selected ? SlintcnPalette.primary.transparentize(root.dark ? 0.9 : 0.95) : transparent;
+    }
+
+    i-touch-area := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: !root.enabled ? not-allowed : root.clickable ? pointer : default;
+        clicked => { root.clicked(); }
+    }
+
+    @children
+}
+
+export component FieldCardContent inherits VerticalLayout {
+    in property <string> title;
+    in property <string> description;
+    in property <bool> enabled: true;
+    in property <bool> invalid;
+
+    spacing: 4px;
+    horizontal-stretch: 1;
+
+    if root.title != "": Text {
+        height: self.preferred-height;
+        text: root.title;
+        font-size: 14px;
+        font-weight: 500;
+        wrap: word-wrap;
+        color: root.invalid ? SlintcnPalette.destructive : SlintcnPalette.foreground;
+        opacity: root.enabled ? 1 : 0.5;
+        accessible-role: none;
+    }
+
+    if root.description != "": Text {
+        height: self.preferred-height;
+        text: root.description;
+        font-size: 14px;
+        wrap: word-wrap;
+        color: SlintcnPalette.muted-foreground;
+        opacity: root.enabled ? 1 : 0.5;
+        accessible-role: none;
+    }
+}

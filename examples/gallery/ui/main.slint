@@ -1,12 +1,13 @@
+import { ScrollView } from "std-widgets.slint";
 import { Alert, AlertVariant } from "@slintcn/alert.slint";
 import { AlertDialog } from "@slintcn/alert-dialog.slint";
 import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@slintcn/card.slint";
 import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
-import { Input } from "@slintcn/input.slint";
+import { Input, InputCard } from "@slintcn/input.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
-import { Switch, SwitchSize } from "@slintcn/switch.slint";
-import { Checkbox } from "@slintcn/checkbox.slint";
+import { Switch, SwitchCard, SwitchSize } from "@slintcn/switch.slint";
+import { Checkbox, CheckboxCard } from "@slintcn/checkbox.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -16,173 +17,231 @@ export component Gallery inherits Window {
 
     property <string> last-result;
 
-    VerticalLayout {
-        padding: 32px;
-        spacing: 32px;
-        alignment: start;
+    gallery-scroll := ScrollView {
+        content-width: max(self.visible-width, gallery-content.min-width);
+        content-height: gallery-content.preferred-height;
 
-        HorizontalLayout {
-            spacing: 8px;
+        gallery-content := VerticalLayout {
+            padding: 32px;
+            spacing: 32px;
             alignment: start;
-
-            Button { text: "Default"; }
-            Button { text: "Secondary"; variant: ButtonVariant.secondary; }
-            Button { text: "Destructive"; variant: ButtonVariant.destructive; }
-            Button { text: "Outline"; variant: ButtonVariant.outline; }
-            Button { text: "Ghost"; variant: ButtonVariant.ghost; }
-            Button { text: "Link"; variant: ButtonVariant.link; }
-        }
-
-        HorizontalLayout {
-            spacing: 8px;
-            alignment: start;
-            cross-axis-alignment: center;
-
-            Button { text: "Small"; size: ButtonSize.sm; variant: ButtonVariant.outline; }
-            Button { text: "Default"; variant: ButtonVariant.outline; }
-            Button { text: "Large"; size: ButtonSize.lg; variant: ButtonVariant.outline; }
-            Button { size: ButtonSize.icon; icon: @image-url("icons/plus.svg"); variant: ButtonVariant.outline; }
-            Button { text: "Add"; icon: @image-url("icons/plus.svg"); }
-            Button { text: "Disabled"; enabled: false; }
-            Button {
-                text: SlintcnPalette.color-scheme == ColorScheme.dark ? "Light mode" : "Dark mode";
-                variant: ButtonVariant.outline;
-                clicked => {
-                    SlintcnPalette.color-scheme = SlintcnPalette.color-scheme == ColorScheme.dark ? ColorScheme.light : ColorScheme.dark;
-                }
-            }
-        }
-
-        HorizontalLayout {
-            spacing: 8px;
-            alignment: start;
-
-            Input { width: 180px; placeholder-text: "Email"; }
-            Input { width: 180px; text: "hello@fyralabs.com"; }
-            Input { width: 180px; text: "hunter2"; input-type: InputType.password; }
-            Input { width: 180px; placeholder-text: "Disabled"; enabled: false; }
-            Input { width: 180px; text: "not-an-email"; invalid: true; }
-        }
-
-        HorizontalLayout {
-            spacing: 24px;
-            alignment: start;
-            cross-axis-alignment: center;
 
             HorizontalLayout {
                 spacing: 8px;
-                cross-axis-alignment: center;
+                alignment: start;
 
-                airplane-mode := Switch {
-                    accessible-label: "Airplane mode";
-                    toggled(checked) => { root.last-result = checked ? "Airplane mode on" : "Airplane mode off"; }
-                }
-                Text { text: "Airplane mode"; color: SlintcnPalette.foreground; font-size: 14px; }
+                Button { text: "Default"; }
+                Button { text: "Secondary"; variant: ButtonVariant.secondary; }
+                Button { text: "Destructive"; variant: ButtonVariant.destructive; }
+                Button { text: "Outline"; variant: ButtonVariant.outline; }
+                Button { text: "Ghost"; variant: ButtonVariant.ghost; }
+                Button { text: "Link"; variant: ButtonVariant.link; }
             }
-
-            Switch { checked: true; accessible-label: "Checked"; }
-            Switch { enabled: false; accessible-label: "Disabled"; }
-            Switch { checked: true; enabled: false; accessible-label: "Disabled checked"; }
-            Switch { invalid: true; accessible-label: "Invalid"; }
-            Switch { checked: true; invalid: true; accessible-label: "Invalid checked"; }
-            Switch { size: SwitchSize.sm; accessible-label: "Small"; }
-            Switch { size: SwitchSize.sm; checked: true; accessible-label: "Small checked"; }
-        }
-
-        HorizontalLayout {
-            spacing: 24px;
-            alignment: start;
-            cross-axis-alignment: center;
 
             HorizontalLayout {
                 spacing: 8px;
+                alignment: start;
                 cross-axis-alignment: center;
 
-                accept-terms := Checkbox {
-                    accessible-label: "Accept terms and conditions";
-                    toggled(checked) => { root.last-result = checked ? "Terms accepted" : "Terms unchecked"; }
+                Button { text: "Small"; size: ButtonSize.sm; variant: ButtonVariant.outline; }
+                Button { text: "Default"; variant: ButtonVariant.outline; }
+                Button { text: "Large"; size: ButtonSize.lg; variant: ButtonVariant.outline; }
+                Button { size: ButtonSize.icon; icon: @image-url("icons/plus.svg"); variant: ButtonVariant.outline; }
+                Button { text: "Add"; icon: @image-url("icons/plus.svg"); }
+                Button { text: "Disabled"; enabled: false; }
+                Button {
+                    text: SlintcnPalette.color-scheme == ColorScheme.dark ? "Light mode" : "Dark mode";
+                    variant: ButtonVariant.outline;
+                    clicked => {
+                        SlintcnPalette.color-scheme = SlintcnPalette.color-scheme == ColorScheme.dark ? ColorScheme.light : ColorScheme.dark;
+                    }
                 }
-                Text { text: "Accept terms and conditions"; color: SlintcnPalette.foreground; font-size: 14px; }
             }
 
-            Checkbox { checked: true; accessible-label: "Checked checkbox"; }
-            Checkbox { enabled: false; accessible-label: "Disabled checkbox"; }
-            Checkbox { checked: true; enabled: false; accessible-label: "Disabled checked checkbox"; }
-            Checkbox { invalid: true; accessible-label: "Invalid checkbox"; }
-            Checkbox { checked: true; invalid: true; accessible-label: "Invalid checked checkbox"; }
-        }
+            HorizontalLayout {
+                spacing: 8px;
+                alignment: start;
 
-        HorizontalLayout {
-            alignment: start;
+                Input { width: 180px; placeholder-text: "Email"; }
+                Input { width: 180px; text: "hello@fyralabs.com"; }
+                Input { width: 180px; text: "hunter2"; input-type: InputType.password; }
+                Input { width: 180px; placeholder-text: "Disabled"; enabled: false; }
+                Input { width: 180px; text: "not-an-email"; invalid: true; }
+            }
 
-            Card {
-                width: 360px;
+            HorizontalLayout {
+                spacing: 24px;
+                alignment: start;
+                cross-axis-alignment: center;
 
-                CardHeader {
-                    CardTitle { text: "Create project"; }
-                    CardDescription { text: "Lorem Ipsum dolor sit amet consectetur adipiscing elit."; }
+                HorizontalLayout {
+                    spacing: 8px;
+                    cross-axis-alignment: center;
+
+                    airplane-mode := Switch {
+                        accessible-label: "Airplane mode";
+                        toggled(checked) => { root.last-result = checked ? "Airplane mode on" : "Airplane mode off"; }
+                    }
+                    Text { text: "Airplane mode"; color: SlintcnPalette.foreground; font-size: 14px; }
                 }
 
-                CardContent {
-                    Text {
-                        text: "Lorem Ipsum dolor sit amet consectetur adipiscing elit.";
-                        color: SlintcnPalette.card-foreground;
-                        wrap: word-wrap;
+                Switch { checked: true; accessible-label: "Checked"; }
+                Switch { enabled: false; accessible-label: "Disabled"; }
+                Switch { checked: true; enabled: false; accessible-label: "Disabled checked"; }
+                Switch { invalid: true; accessible-label: "Invalid"; }
+                Switch { checked: true; invalid: true; accessible-label: "Invalid checked"; }
+                Switch { size: SwitchSize.sm; accessible-label: "Small"; }
+                Switch { size: SwitchSize.sm; checked: true; accessible-label: "Small checked"; }
+            }
+
+            HorizontalLayout {
+                spacing: 24px;
+                alignment: start;
+                cross-axis-alignment: center;
+
+                HorizontalLayout {
+                    spacing: 8px;
+                    cross-axis-alignment: center;
+
+                    accept-terms := Checkbox {
+                        accessible-label: "Accept terms and conditions";
+                        toggled(checked) => { root.last-result = checked ? "Terms accepted" : "Terms unchecked"; }
+                    }
+                    Text { text: "Accept terms and conditions"; color: SlintcnPalette.foreground; font-size: 14px; }
+                }
+
+                Checkbox { checked: true; accessible-label: "Checked checkbox"; }
+                Checkbox { enabled: false; accessible-label: "Disabled checkbox"; }
+                Checkbox { checked: true; enabled: false; accessible-label: "Disabled checked checkbox"; }
+                Checkbox { invalid: true; accessible-label: "Invalid checkbox"; }
+                Checkbox { checked: true; invalid: true; accessible-label: "Invalid checked checkbox"; }
+            }
+
+            VerticalLayout {
+                width: 384px;
+                spacing: 24px;
+                alignment: start;
+
+                VerticalLayout {
+                    spacing: 12px;
+
+                    InputCard {
+                        title: "Display name";
+                        description: "This is how your name appears to others.";
+                        placeholder-text: "Your name";
+                        edited(text) => { root.last-result = "Display name: " + text; }
+                    }
+                    InputCard {
+                        title: "Password";
+                        description: "Use a strong, unique password.";
+                        text: "hunter2";
+                        input-type: InputType.password;
                     }
                 }
 
-                CardFooter {
-                    spacing: 8px;
-                    alignment: end;
+                VerticalLayout {
+                    spacing: 12px;
 
-                    Button { text: "Cancel"; variant: ButtonVariant.outline; }
-                    Button { text: "Deploy"; }
+                    SwitchCard {
+                        title: "Share across devices";
+                        description: "Focus is shared across devices, and turns off when you leave the app.";
+                        toggled(checked) => { root.last-result = checked ? "Sharing enabled" : "Sharing disabled"; }
+                    }
+                    SwitchCard {
+                        title: "Enable notifications";
+                        description: "Receive notifications when focus mode is enabled or disabled.";
+                        checked: true;
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: 12px;
+
+                    CheckboxCard {
+                        title: "Accept terms and conditions";
+                        description: "By clicking this checkbox, you agree to the terms and conditions.";
+                        toggled(checked) => { root.last-result = checked ? "Terms accepted" : "Terms unchecked"; }
+                    }
+                    CheckboxCard {
+                        title: "Enable notifications";
+                        description: "You can enable or disable notifications at any time.";
+                        checked: true;
+                    }
                 }
             }
-        }
 
-        VerticalLayout {
-            width: 480px;
-            spacing: 16px;
+            HorizontalLayout {
+                alignment: start;
 
-            Alert {
-                icon: @image-url("icons/circle-check.svg");
-                title: "Success! Your changes have been saved";
-                description: "This is an alert with icon, title and description.";
+                Card {
+                    width: 360px;
+
+                    CardHeader {
+                        CardTitle { text: "Create project"; }
+                        CardDescription { text: "Lorem Ipsum dolor sit amet consectetur adipiscing elit."; }
+                    }
+
+                    CardContent {
+                        Text {
+                            text: "Lorem Ipsum dolor sit amet consectetur adipiscing elit.";
+                            color: SlintcnPalette.card-foreground;
+                            wrap: word-wrap;
+                        }
+                    }
+
+                    CardFooter {
+                        spacing: 8px;
+                        alignment: end;
+
+                        Button { text: "Cancel"; variant: ButtonVariant.outline; }
+                        Button { text: "Deploy"; }
+                    }
+                }
             }
 
-            Alert {
-                variant: AlertVariant.destructive;
-                icon: @image-url("icons/circle-alert.svg");
-                title: "Unable to process your payment.";
-                description: "Please verify your billing information and try again.";
+            VerticalLayout {
+                width: 480px;
+                spacing: 16px;
+
+                Alert {
+                    icon: @image-url("icons/circle-check.svg");
+                    title: "Success! Your changes have been saved";
+                    description: "This is an alert with icon, title and description.";
+                }
+
+                Alert {
+                    variant: AlertVariant.destructive;
+                    icon: @image-url("icons/circle-alert.svg");
+                    title: "Unable to process your payment.";
+                    description: "Please verify your billing information and try again.";
+                }
+
+                Alert {
+                    title: "No icon or description";
+                }
             }
 
-            Alert {
-                title: "No icon or description";
-            }
-        }
+            HorizontalLayout {
+                spacing: 8px;
+                alignment: start;
 
-        HorizontalLayout {
-            spacing: 8px;
-            alignment: start;
+                open-dialog := Button {
+                    text: "Open dialog";
+                    variant: ButtonVariant.outline;
+                    clicked => { edit-dialog.show(); }
+                }
 
-            open-dialog := Button {
-                text: "Open dialog";
-                variant: ButtonVariant.outline;
-                clicked => { edit-dialog.show(); }
-            }
+                open-alert-dialog := Button {
+                    text: "Delete account";
+                    variant: ButtonVariant.destructive;
+                    clicked => { delete-dialog.show(); }
+                }
 
-            open-alert-dialog := Button {
-                text: "Delete account";
-                variant: ButtonVariant.destructive;
-                clicked => { delete-dialog.show(); }
-            }
-
-            result := Text {
-                text: root.last-result;
-                color: SlintcnPalette.muted-foreground;
-                vertical-alignment: center;
+                result := Text {
+                    text: root.last-result;
+                    color: SlintcnPalette.muted-foreground;
+                    vertical-alignment: center;
+                }
             }
         }
     }

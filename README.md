@@ -33,7 +33,7 @@ my-app/
       button.slint, card.slint, alert.slint, dialog.slint, …
 ```
 
-You can copy single components. Every component needs `styling.slint`. Keep `_x.svg` next to it, since the Dialog's close button uses it. AlertDialog also needs `dialog.slint` and `button.slint`. Checkbox needs `_check.svg` next to `checkbox.slint`.
+You can copy single components. Every component needs `styling.slint`. Keep `_x.svg` next to it, since the Dialog's close button uses it. AlertDialog also needs `dialog.slint` and `button.slint`. Checkbox needs `_check.svg` next to `checkbox.slint`. Input, Switch, and Checkbox also need `_field-card.slint` for their card variants, which are exported from the same control files.
 
 ### 2. Map the `@slintcn` library
 
@@ -126,10 +126,11 @@ There's no automatic upgrade. Compare your copy with the latest `src/components/
 | `AlertDialog` | `@slintcn/alert-dialog.slint` | draft |
 | `Button`, `ButtonVariant`, `ButtonSize` | `@slintcn/button.slint` | draft |
 | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` | `@slintcn/card.slint` | draft |
-| `Checkbox` | `@slintcn/checkbox.slint` | draft |
+| `Checkbox`, `CheckboxCard` | `@slintcn/checkbox.slint` | draft |
 | `Dialog`, `DialogFooter` | `@slintcn/dialog.slint` | draft |
 | `SlintcnPalette`, `SlintcnSizeSettings` (colors, dark/light, radii) | `@slintcn/styling.slint` | draft |
-| `Switch`, `SwitchSize` | `@slintcn/switch.slint` | draft |
+| `Input`, `InputCard` | `@slintcn/input.slint` | draft |
+| `Switch`, `SwitchCard`, `SwitchSize` | `@slintcn/switch.slint` | draft |
 
 ### Checkbox
 
@@ -158,6 +159,31 @@ Switch {
 ```
 
 Bind `checked` with `<=>` to share state with your app. `toggled(bool)` fires on user activation, not programmatic changes. Use `SwitchSize.sm` for the smaller switch, `enabled: false` to disable it, and `invalid: true` for the validation ring. The switch supports mouse, Space/Enter, and accessibility activation; Tab focus shows a focus ring.
+
+### Control cards
+
+`InputCard`, `SwitchCard`, and `CheckboxCard` pair the existing controls with a `title`, optional `description`, and a bordered field card.
+
+```slint
+import { InputCard } from "@slintcn/input.slint";
+import { SwitchCard } from "@slintcn/switch.slint";
+import { CheckboxCard } from "@slintcn/checkbox.slint";
+
+VerticalLayout {
+    spacing: 12px;
+    InputCard { title: "Display name"; placeholder-text: "Your name"; }
+    SwitchCard {
+        title: "Share across devices";
+        description: "Focus is shared across devices, and turns off when you leave the app.";
+        checked: true;
+    }
+    CheckboxCard { title: "Accept terms and conditions"; }
+}
+```
+
+The whole switch or checkbox card is clickable; selected cards get a tinted background and border. Clicking an input card's background focuses its input. The underlying control remains the keyboard and accessibility target, labelled by the title and description.
+
+Cards forward the control's state and callbacks: `text`, `edited(string)` and `accepted(string)` for inputs; `checked` and `toggled(bool)` for switches and checkboxes. `InputCard` also forwards `placeholder-text`, `read-only`, `input-type`, `input-method-hints`, and `password-visible`; `SwitchCard` forwards `size`. All three support `enabled`, `invalid`, and `has-focus`.
 
 ## Developing slintcn
 

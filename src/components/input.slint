@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
 import { Button, ButtonVariant } from "button.slint";
+import { FieldCard, FieldCardContent } from "_field-card.slint";
 
 
 // input component
@@ -28,6 +29,8 @@ export component Input {
     max-height: 36px;
     horizontal-stretch: 1;
     vertical-stretch: 0;
+    forward-focus: i-text-input;
+    accessible-role: none;
 
     i-background := Rectangle {
         border-radius: SlintcnSizeSettings.radius-md;
@@ -47,6 +50,8 @@ export component Input {
             vertical-alignment: center;
             font-size: 14px;
             color: SlintcnPalette.foreground;
+            accessible-label: root.accessible-label;
+            accessible-description: root.accessible-description;
 
             edited => { root.edited(self.text); }
             accepted => { root.accepted(self.text); }
@@ -71,6 +76,57 @@ export component Input {
             variant: ButtonVariant.ghost;
             enabled: root.enabled;
             clicked => { root.password-visible = !root.password-visible; }
+        }
+    }
+}
+
+export component InputCard {
+    in property <string> title <=> i-content.title;
+    in property <string> description <=> i-content.description;
+    in-out property <string> text <=> i-input.text;
+    in property <string> placeholder-text <=> i-input.placeholder-text;
+    in property <bool> enabled <=> i-input.enabled;
+    in property <bool> read-only <=> i-input.read-only;
+    in property <bool> invalid <=> i-input.invalid;
+    in property <InputType> input-type <=> i-input.input-type;
+    in property <InputMethodHints> input-method-hints <=> i-input.input-method-hints;
+    in-out property <bool> password-visible <=> i-input.password-visible;
+    out property <bool> has-focus: i-input.has-focus;
+
+    callback edited(text: string);
+    callback accepted(text: string);
+
+    min-width: 160px;
+    preferred-width: 384px;
+    min-height: i-layout.min-height;
+    preferred-height: i-layout.preferred-height;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    forward-focus: i-input;
+
+    FieldCard {
+        width: 100%;
+        height: 100%;
+        enabled: root.enabled;
+        invalid: root.invalid;
+        clickable: false;
+        clicked => { i-input.focus(); }
+
+        i-layout := VerticalLayout {
+            padding: 12px;
+            spacing: 12px;
+
+            i-content := FieldCardContent {
+                enabled: root.enabled;
+                invalid: root.invalid;
+            }
+
+            i-input := Input {
+                accessible-label: root.title;
+                accessible-description: root.description;
+                edited(text) => { root.edited(text); }
+                accepted(text) => { root.accepted(text); }
+            }
         }
     }
 }
