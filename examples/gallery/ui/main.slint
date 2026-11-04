@@ -1,4 +1,4 @@
-import { ScrollView } from "std-widgets.slint";
+import { ScrollArea } from "@slintcn/scroll-area.slint";
 import { Alert, AlertVariant } from "@slintcn/alert.slint";
 import { AlertDialog } from "@slintcn/alert-dialog.slint";
 import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
@@ -17,7 +17,7 @@ export component Gallery inherits Window {
 
     property <string> last-result;
 
-    gallery-scroll := ScrollView {
+    gallery-scroll := ScrollArea {
         content-width: max(self.visible-width, gallery-content.min-width);
         content-height: gallery-content.preferred-height;
 

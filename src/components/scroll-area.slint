@@ -1,0 +1,208 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export component ScrollBar {
+    in property <Orientation> orientation: Orientation.vertical;
+    in property <ScrollBarPolicy> policy: ScrollBarPolicy.as-needed;
+    in property <bool> enabled <=> i-touch-area.enabled;
+    in property <length> content-size;
+    in property <length> page-size;
+    in-out property <length> value;
+
+    callback scrolled;
+
+    private property <bool> horizontal: root.orientation == Orientation.horizontal;
+    private property <length> maximum: max(0px, root.content-size - root.page-size);
+    private property <length> track-length: max(0px, (root.horizontal ? root.width : root.height) - 2px);
+    private property <length> thumb-length: root.content-size > 0px ? clamp(root.track-length * root.page-size / root.content-size, min(18px, root.track-length), root.track-length) : root.track-length;
+    private property <length> travel: root.track-length - root.thumb-length;
+    private property <length> thumb-position: 1px + (root.maximum > 0px ? root.travel * clamp(-root.value / root.maximum, 0, 1) : 0px);
+    private property <length> drag-anchor;
+
+    width: 10px;
+    height: 100%;
+
+    states [
+        horizontal when root.horizontal: {
+            root.width: 100%;
+            root.height: 10px;
+        }
+    ]
+    visible: root.policy == ScrollBarPolicy.always-on || (root.policy == ScrollBarPolicy.as-needed && root.maximum > 0px);
+
+    accessible-role: slider;
+    accessible-label: root.horizontal ? "Horizontal scroll" : "Vertical scroll";
+    accessible-enabled: root.enabled;
+    accessible-value: -root.value / 1px;
+    accessible-value-minimum: 0;
+    accessible-value-maximum: root.maximum / 1px;
+    accessible-action-increment => { root.set-value(root.value - 40px); }
+    accessible-action-decrement => { root.set-value(root.value + 40px); }
+    accessible-action-set-value(value) => {
+        if value.is-float() {
+            root.set-value(-value.to-float() * 1px);
+        }
+    }
+
+    function set-value(value: length) {
+        if root.enabled {
+            root.value = clamp(value, -root.maximum, 0px);
+            root.scrolled();
+        }
+    }
+
+    function move-thumb(position: length) {
+        if root.travel > 0px {
+            root.set-value(-(position - 1px - root.drag-anchor) / root.travel * root.maximum);
+        }
+    }
+
+    i-thumb := Rectangle {
+        x: root.horizontal ? root.thumb-position : 2px;
+        y: root.horizontal ? 2px : root.thumb-position;
+        width: root.horizontal ? root.thumb-length : 7px;
+        height: root.horizontal ? 7px : root.thumb-length;
+        border-radius: 4px;
+        background: SlintcnPalette.border;
+        opacity: root.enabled ? 1 : 0.5;
+    }
+
+    i-touch-area := TouchArea {
+        private property <bool> dragging;
+
+        pointer-event(event) => {
+            if event.button == PointerEventButton.left && event.kind == PointerEventKind.down {
+                self.dragging = true;
+                let position = root.horizontal ? self.mouse-x : self.mouse-y;
+                root.drag-anchor = position >= root.thumb-position && position <= root.thumb-position + root.thumb-length ? position - root.thumb-position : root.thumb-length / 2;
+                root.move-thumb(position);
+            } else if event.kind == PointerEventKind.up || event.kind == PointerEventKind.cancel {
+                self.dragging = false;
+            }
+        }
+
+        moved => {
+            if self.pressed && self.dragging {
+                root.move-thumb(root.horizontal ? self.mouse-x : self.mouse-y);
+            }
+        }
+
+        scroll-event(event) => {
+            let delta = root.horizontal ? (event.delta-x != 0px ? event.delta-x : event.delta-y) : event.delta-y;
+            let next-value = clamp(root.value + delta, -root.maximum, 0px);
+            if root.enabled && next-value != root.value {
+                root.set-value(next-value);
+                return accept;
+            }
+            return reject;
+        }
+    }
+}
+
+export component ScrollArea {
+    in property <length> content-width <=> i-viewport.content-width;
+    in property <length> content-height <=> i-viewport.content-height;
+    in-out property <length> content-x <=> i-viewport.content-x;
+    in-out property <length> content-y <=> i-viewport.content-y;
+    in property <bool> mouse-drag-pan-enabled <=> i-viewport.mouse-drag-pan-enabled;
+    in property <ScrollBarPolicy> vertical-scrollbar-policy <=> i-vertical-bar.policy;
+    in property <ScrollBarPolicy> horizontal-scrollbar-policy <=> i-horizontal-bar.policy;
+    out property <length> visible-width: i-viewport.width;
+    out property <length> visible-height: i-viewport.height;
+    out property <bool> has-focus: i-focus-scope.has-focus;
+
+    callback scrolled <=> i-viewport.flicked;
+
+    private property <bool> keyboard-focus;
+    private property <length> maximum-x: max(0px, root.content-width - root.visible-width);
+    private property <length> maximum-y: max(0px, root.content-height - root.visible-height);
+
+    min-width: 50px;
+    min-height: 50px;
+    preferred-width: 100%;
+    preferred-height: 100%;
+    horizontal-stretch: 1;
+    vertical-stretch: 1;
+    forward-focus: i-focus-scope;
+
+    function scroll-to(x: length, y: length) -> bool {
+        let next-x = clamp(x, -root.maximum-x, 0px);
+        let next-y = clamp(y, -root.maximum-y, 0px);
+        if next-x == root.content-x && next-y == root.content-y {
+            return false;
+        }
+        root.content-x = next-x;
+        root.content-y = next-y;
+        root.scrolled();
+        return true;
+    }
+
+    if root.has-focus && root.keyboard-focus: Rectangle {
+        x: -3px;
+        y: -3px;
+        width: root.width + 6px;
+        height: root.height + 6px;
+        border-radius: SlintcnSizeSettings.radius-md + 3px;
+        border-width: 3px;
+        border-color: SlintcnPalette.ring.transparentize(0.5);
+    }
+
+    i-focus-scope := FocusScope {
+        x: 0;
+        y: 0;
+        width: 100%;
+        height: 100%;
+
+        i-viewport := Flickable {
+            x: 0;
+            y: 0;
+            width: 100%;
+            height: 100%;
+            mouse-drag-pan-enabled: false;
+            @children
+        }
+
+        focus-gained(reason) => {
+            if reason != FocusReason.window-activation {
+                root.keyboard-focus = reason == FocusReason.tab-navigation;
+            }
+        }
+
+        key-pressed(event) => {
+            let x = event.text == Key.LeftArrow ? root.content-x - 40px
+                : event.text == Key.RightArrow ? root.content-x + 40px
+                : root.maximum-y == 0px && event.text == Key.Home ? 0px
+                : root.maximum-y == 0px && event.text == Key.End ? -root.maximum-x
+                : root.content-x;
+            let y = event.text == Key.UpArrow ? root.content-y + 40px
+                : event.text == Key.DownArrow ? root.content-y - 40px
+                : event.text == Key.PageUp ? root.content-y + root.visible-height
+                : event.text == Key.PageDown ? root.content-y - root.visible-height
+                : root.maximum-y > 0px && event.text == Key.Home ? 0px
+                : root.maximum-y > 0px && event.text == Key.End ? -root.maximum-y
+                : root.content-y;
+            return root.scroll-to(x, y) ? accept : reject;
+        }
+    }
+
+    i-vertical-bar := ScrollBar {
+        x: root.width - self.width;
+        y: 0;
+        height: root.height - (i-horizontal-bar.visible ? 10px : 0px);
+        content-size: root.content-height;
+        page-size: root.visible-height;
+        value <=> root.content-y;
+        scrolled => { root.scrolled(); }
+    }
+
+    i-horizontal-bar := ScrollBar {
+        x: 0;
+        y: root.height - self.height;
+        width: root.width - (i-vertical-bar.visible ? 10px : 0px);
+        orientation: Orientation.horizontal;
+        content-size: root.content-width;
+        page-size: root.visible-width;
+        value <=> root.content-x;
+        scrolled => { root.scrolled(); }
+    }
+}

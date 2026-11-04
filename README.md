@@ -130,6 +130,7 @@ There's no automatic upgrade. Compare your copy with the latest `src/components/
 | `Dialog`, `DialogFooter` | `@slintcn/dialog.slint` | draft |
 | `SlintcnPalette`, `SlintcnSizeSettings` (colors, dark/light, radii) | `@slintcn/styling.slint` | draft |
 | `Input`, `InputCard` | `@slintcn/input.slint` | draft |
+| `ScrollArea`, `ScrollBar` | `@slintcn/scroll-area.slint` | draft |
 | `Switch`, `SwitchCard`, `SwitchSize` | `@slintcn/switch.slint` | draft |
 
 ### Checkbox
@@ -159,6 +160,36 @@ Switch {
 ```
 
 Bind `checked` with `<=>` to share state with your app. `toggled(bool)` fires on user activation, not programmatic changes. Use `SwitchSize.sm` for the smaller switch, `enabled: false` to disable it, and `invalid: true` for the validation ring. The switch supports mouse, Space/Enter, and accessibility activation; Tab focus shows a focus ring.
+
+### Scroll area
+
+```slint
+import { ScrollArea } from "@slintcn/scroll-area.slint";
+import { SlintcnPalette } from "@slintcn/styling.slint";
+
+ScrollArea {
+    width: 350px;
+    height: 200px;
+    content-width: self.visible-width;
+    content-height: content.preferred-height;
+
+    content := VerticalLayout {
+        padding: 16px;
+        spacing: 12px;
+        for i in 50: Text {
+            text: "v1.2.0-beta.\{50 - i}";
+            color: SlintcnPalette.foreground;
+            font-size: 14px;
+        }
+    }
+}
+```
+
+Give the scroll area a bounded size. Slint's `Flickable` handles wheel, touchpad, and touch scrolling; the themed 10px overlay scrollbars appear on either axis when needed. `vertical-scrollbar-policy` and `horizontal-scrollbar-policy` accept Slint's `ScrollBarPolicy` values. Hiding a scrollbar does not disable scrolling.
+
+Bind `content-x`/`content-y` to share the scroll position (zero at the start, negative when scrolled). `visible-width`/`visible-height` expose the viewport size, and `scrolled()` reports user scrolling. Tab focuses the viewport with a focus ring; arrows, Page Up/Down, and Home/End scroll it. Keys handled by child controls stay with those controls.
+
+`ScrollBar` is also exported for custom compositions. Set `orientation: Orientation.horizontal` for a horizontal bar, provide `content-size` and `page-size`, and bind its negative-offset `value`. Its thumb supports dragging and clicking the track.
 
 ### Control cards
 
