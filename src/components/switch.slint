@@ -1,0 +1,116 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { SlintcnPalette } from "styling.slint";
+
+export enum SwitchSize {
+    default,
+    sm,
+}
+
+export component Switch {
+    in-out property <bool> checked;
+    in property <bool> enabled <=> i-touch-area.enabled;
+    in property <bool> invalid;
+    in property <SwitchSize> size;
+    out property <bool> has-focus: i-focus-scope.has-focus;
+    out property <bool> pressed: root.enabled && i-touch-area.pressed;
+
+    callback toggled(checked: bool);
+
+    private property <bool> dark: SlintcnPalette.color-scheme == ColorScheme.dark;
+    private property <bool> keyboard-focus;
+    private property <bool> focus-visible: root.has-focus && root.keyboard-focus;
+    private property <length> control-width: root.size == SwitchSize.sm ? 24px : 32px;
+    private property <length> control-height: root.size == SwitchSize.sm ? 14px : 18.4px;
+
+    min-width: root.control-width;
+    max-width: root.control-width;
+    min-height: root.control-height;
+    max-height: root.control-height;
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    forward-focus: i-focus-scope;
+
+    accessible-role: switch;
+    accessible-enabled: root.enabled;
+    accessible-checkable: true;
+    accessible-checked <=> root.checked;
+    accessible-action-default => { root.toggle(); }
+
+    function toggle() {
+        if root.enabled {
+            root.checked = !root.checked;
+            root.toggled(root.checked);
+        }
+    }
+
+    if root.focus-visible || root.invalid: Rectangle {
+        x: -3px;
+        y: -3px;
+        width: root.width + 6px;
+        height: root.height + 6px;
+        border-radius: self.height / 2;
+        border-width: 3px;
+        border-color: root.invalid ? SlintcnPalette.destructive.transparentize(root.dark ? 0.6 : 0.8) : SlintcnPalette.ring.transparentize(0.5);
+        opacity: root.enabled ? 1 : 0.5;
+    }
+
+    i-track := Rectangle {
+        border-radius: self.height / 2;
+        border-width: 1px;
+        border-color: root.invalid ? SlintcnPalette.destructive.transparentize(root.dark ? 0.5 : 0) : root.focus-visible ? SlintcnPalette.ring : transparent;
+        background: root.checked ? SlintcnPalette.primary : root.dark ? SlintcnPalette.input.transparentize(0.2) : SlintcnPalette.input;
+        drop-shadow-offset-y: 1px;
+        drop-shadow-blur: 2px;
+        drop-shadow-color: #0000000d;
+        opacity: root.enabled ? 1 : 0.5;
+
+        animate background, border-color { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+
+        i-thumb := Rectangle {
+            x: root.checked ? parent.width - self.width - 1px : 1px;
+            y: (parent.height - self.height) / 2;
+            width: root.size == SwitchSize.sm ? 12px : 16px;
+            height: self.width;
+            border-radius: self.height / 2;
+            background: root.dark ? (root.checked ? SlintcnPalette.primary-foreground : SlintcnPalette.foreground) : SlintcnPalette.background;
+
+            animate x, background { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+        }
+    }
+
+    i-touch-area := TouchArea {
+        x: -12px;
+        y: -8px;
+        width: root.width + 24px;
+        height: root.height + 16px;
+        mouse-cursor: root.enabled ? pointer : not-allowed;
+        clicked => {
+            if root.enabled {
+                root.keyboard-focus = false;
+                i-focus-scope.focus();
+                root.toggle();
+            }
+        }
+    }
+
+    i-focus-scope := FocusScope {
+        x: 0;
+        width: 0;
+        enabled <=> root.enabled;
+
+        focus-gained(reason) => {
+            if reason != FocusReason.window-activation {
+                root.keyboard-focus = reason == FocusReason.tab-navigation;
+            }
+        }
+
+        key-pressed(event) => {
+            if event.text == Key.Space || event.text == Key.Return {
+                root.toggle();
+                return accept;
+            }
+            return reject;
+        }
+    }
+}
+

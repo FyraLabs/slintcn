@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
 import { Input } from "@slintcn/input.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
+import { Switch, SwitchSize } from "@slintcn/switch.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -60,6 +61,31 @@ export component Gallery inherits Window {
             Input { width: 180px; text: "hunter2"; input-type: InputType.password; }
             Input { width: 180px; placeholder-text: "Disabled"; enabled: false; }
             Input { width: 180px; text: "not-an-email"; invalid: true; }
+        }
+
+        HorizontalLayout {
+            spacing: 24px;
+            alignment: start;
+            cross-axis-alignment: center;
+
+            HorizontalLayout {
+                spacing: 8px;
+                cross-axis-alignment: center;
+
+                airplane-mode := Switch {
+                    accessible-label: "Airplane mode";
+                    toggled(checked) => { root.last-result = checked ? "Airplane mode on" : "Airplane mode off"; }
+                }
+                Text { text: "Airplane mode"; color: SlintcnPalette.foreground; font-size: 14px; }
+            }
+
+            Switch { checked: true; accessible-label: "Checked"; }
+            Switch { enabled: false; accessible-label: "Disabled"; }
+            Switch { checked: true; enabled: false; accessible-label: "Disabled checked"; }
+            Switch { invalid: true; accessible-label: "Invalid"; }
+            Switch { checked: true; invalid: true; accessible-label: "Invalid checked"; }
+            Switch { size: SwitchSize.sm; accessible-label: "Small"; }
+            Switch { size: SwitchSize.sm; checked: true; accessible-label: "Small checked"; }
         }
 
         HorizontalLayout {

@@ -128,6 +128,22 @@ There's no automatic upgrade. Compare your copy with the latest `src/components/
 | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` | `@slintcn/card.slint` | draft |
 | `Dialog`, `DialogFooter` | `@slintcn/dialog.slint` | draft |
 | `SlintcnPalette`, `SlintcnSizeSettings` (colors, dark/light, radii) | `@slintcn/styling.slint` | draft |
+| `Switch`, `SwitchSize` | `@slintcn/switch.slint` | draft |
+
+### Switch
+
+```slint
+import { Switch, SwitchSize } from "@slintcn/switch.slint";
+
+Switch {
+    accessible-label: "Airplane mode";
+    checked: false;
+    size: SwitchSize.default;
+    toggled(checked) => { debug("Airplane mode:", checked); }
+}
+```
+
+Bind `checked` with `<=>` to share state with your app. `toggled(bool)` fires on user activation, not programmatic changes. Use `SwitchSize.sm` for the smaller switch, `enabled: false` to disable it, and `invalid: true` for the validation ring. The switch supports mouse, Space/Enter, and accessibility activation; Tab focus shows a focus ring.
 
 ## Developing slintcn
 
