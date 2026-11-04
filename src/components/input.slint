@@ -36,34 +36,31 @@ export component Input {
         background: transparent;
         clip: true;
 
-        HorizontalLayout {
-            padding-left: 12px;
-            padding-right: root.input-type == InputType.password ? 72px : 12px;
+        i-text-input := TextInput {
+            x: 12px;
+            y: 0;
+            width: max(0px, parent.width - 12px - (root.input-type == InputType.password ? 72px : 12px));
+            height: 100%;
+            single-line: true;
+            input-method-hints: root.input-method-hints;
+            input-type: root.input-type == InputType.password && root.password-visible ? InputType.text : root.input-type;
+            vertical-alignment: center;
+            font-size: 14px;
+            color: SlintcnPalette.foreground;
 
-            Rectangle {
-                i-text-input := TextInput {
-                    width: 100%;
-                    height: 100%;
-                    single-line: true;
-                    input-method-hints: root.input-method-hints;
-                    input-type: root.input-type == InputType.password && root.password-visible ? InputType.text : root.input-type;
-                    vertical-alignment: center;
-                    font-size: 14px;
-                    color: SlintcnPalette.foreground;
+            edited => { root.edited(self.text); }
+            accepted => { root.accepted(self.text); }
+        }
 
-                    edited => { root.edited(self.text); }
-                    accepted => { root.accepted(self.text); }
-                }
-
-                if root.text == "" && root.placeholder-text != "": Text {
-                    width: 100%;
-                    height: 100%;
-                    text: root.placeholder-text;
-                    color: SlintcnPalette.muted-foreground;
-                    font-size: 14px;
-                    vertical-alignment: center;
-                }
-            }
+        if root.text == "" && root.placeholder-text != "": Text {
+            x: i-text-input.x;
+            y: i-text-input.y;
+            width: i-text-input.width;
+            height: i-text-input.height;
+            text: root.placeholder-text;
+            color: SlintcnPalette.muted-foreground;
+            font-size: 14px;
+            vertical-alignment: center;
         }
 
         if root.input-type == InputType.password: Button {
