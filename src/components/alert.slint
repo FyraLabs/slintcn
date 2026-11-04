@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { ComponentPalette, ComponentSizeSettings } from "styling.slint";
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
 
 export enum AlertVariant {
     default,
@@ -15,17 +15,17 @@ export component Alert {
 
     property <bool> has-icon: root.icon.width > 0 && root.icon.height > 0;
     property <bool> destructive: root.variant == AlertVariant.destructive;
-    property <brush> text-color: root.destructive ? ComponentPalette.destructive : ComponentPalette.card-foreground;
+    property <brush> text-color: root.destructive ? SlintcnPalette.destructive : SlintcnPalette.card-foreground;
 
     accessible-role: text;
     accessible-label: root.title;
     accessible-description: root.description;
 
     Rectangle {
-        background: ComponentPalette.card;
-        border-radius: ComponentSizeSettings.radius-lg;
+        background: SlintcnPalette.card;
+        border-radius: SlintcnSizeSettings.radius-lg;
         border-width: 1px;
-        border-color: ComponentPalette.border;
+        border-color: SlintcnPalette.border;
     }
 
     HorizontalLayout {
@@ -63,7 +63,7 @@ export component Alert {
 
             if root.description != "": Text {
                 text: root.description;
-                color: root.destructive ? ComponentPalette.destructive.transparentize(0.1) : ComponentPalette.muted-foreground;
+                color: root.destructive ? SlintcnPalette.destructive.transparentize(0.1) : SlintcnPalette.muted-foreground;
                 font-size: 14px;
                 wrap: word-wrap;
                 accessible-role: none;

@@ -1,0 +1,184 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export enum ButtonVariant {
+    default,
+    destructive,
+    outline,
+    secondary,
+    ghost,
+    link,
+}
+
+export enum ButtonSize {
+    default,
+    sm,
+    lg,
+    icon,
+}
+
+export component Button {
+    in property <string> text;
+    in property <image> icon;
+    in property <ButtonVariant> variant;
+    in property <ButtonSize> size;
+    in property <bool> enabled <=> i-touch-area.enabled;
+    out property <bool> has-focus: i-focus-scope.has-focus;
+    out property <bool> pressed: self.enabled && i-touch-area.pressed;
+
+    callback clicked;
+
+    property <bool> dark: SlintcnPalette.color-scheme == ColorScheme.dark;
+    property <bool> hovered: i-touch-area.has-hover;
+    property <bool> has-icon: root.icon.width > 0 && root.icon.height > 0;
+    property <bool> has-text: root.text != "";
+    property <bool> keyboard-focus;
+    property <bool> focus-visible: root.has-focus && root.keyboard-focus;
+
+    property <length> control-height: root.size == ButtonSize.sm ? 32px : root.size == ButtonSize.lg ? 40px : 36px;
+    property <length> padding-x: {
+        if root.size == ButtonSize.icon {
+            return 0;
+        }
+        if root.size == ButtonSize.sm {
+            return root.has-icon ? 10px : 12px;
+        }
+        if root.size == ButtonSize.lg {
+            return root.has-icon ? 16px : 24px;
+        }
+        return root.has-icon ? 12px : 16px;
+    }
+
+    property <color> destructive-fill: root.dark ? SlintcnPalette.destructive.transparentize(0.4) : SlintcnPalette.destructive;
+    property <brush> fill: {
+        if root.variant == ButtonVariant.default {
+            return root.hovered ? SlintcnPalette.primary.transparentize(0.1) : SlintcnPalette.primary;
+        }
+        if root.variant == ButtonVariant.destructive {
+            return root.hovered ? root.destructive-fill.transparentize(0.1) : root.destructive-fill;
+        }
+        if root.variant == ButtonVariant.outline {
+            if root.dark {
+                return SlintcnPalette.input.transparentize(root.hovered ? 0.5 : 0.7);
+            }
+            return root.hovered ? SlintcnPalette.accent : SlintcnPalette.background;
+        }
+        if root.variant == ButtonVariant.secondary {
+            return root.hovered ? SlintcnPalette.secondary.transparentize(0.2) : SlintcnPalette.secondary;
+        }
+        if root.variant == ButtonVariant.ghost && root.hovered {
+            return root.dark ? SlintcnPalette.accent.transparentize(0.5) : SlintcnPalette.accent;
+        }
+        return transparent;
+    }
+    property <brush> text-color: {
+        if root.variant == ButtonVariant.default {
+            return SlintcnPalette.primary-foreground;
+        }
+        if root.variant == ButtonVariant.destructive {
+            return #ffffff;
+        }
+        if root.variant == ButtonVariant.secondary {
+            return SlintcnPalette.secondary-foreground;
+        }
+        if root.variant == ButtonVariant.link {
+            return SlintcnPalette.primary;
+        }
+        return root.hovered ? SlintcnPalette.accent-foreground : SlintcnPalette.foreground;
+    }
+
+    min-width: root.size == ButtonSize.icon ? root.control-height : max(root.control-height, i-layout.min-width);
+    min-height: root.control-height;
+    max-height: root.control-height;
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    forward-focus: i-focus-scope;
+
+    accessible-role: button;
+    accessible-enabled: root.enabled;
+    accessible-label: root.text;
+    accessible-action-default => { i-touch-area.clicked(); }
+
+    if root.focus-visible: Rectangle {
+        x: -3px;
+        y: -3px;
+        width: root.width + 6px;
+        height: root.height + 6px;
+        border-radius: SlintcnSizeSettings.radius-md + 3px;
+        border-width: 3px;
+        border-color: root.variant == ButtonVariant.destructive ? SlintcnPalette.destructive.transparentize(root.dark ? 0.6 : 0.8) : SlintcnPalette.ring.transparentize(0.5);
+    }
+
+    i-background := Rectangle {
+        border-radius: SlintcnSizeSettings.radius-md;
+        border-width: root.variant == ButtonVariant.outline ? 1px : 0;
+        border-color: root.focus-visible ? SlintcnPalette.ring : root.dark ? SlintcnPalette.input : SlintcnPalette.border;
+        background: root.fill;
+        drop-shadow-offset-y: root.variant == ButtonVariant.outline ? 1px : 0;
+        drop-shadow-blur: root.variant == ButtonVariant.outline ? 2px : 0;
+        drop-shadow-color: #0000000d;
+        opacity: root.enabled ? 1 : 0.5;
+
+        animate background, border-color { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+
+        i-layout := HorizontalLayout {
+            padding-left: root.padding-x;
+            padding-right: root.padding-x;
+            spacing: root.has-icon && root.has-text ? (root.size == ButtonSize.sm ? 6px : 8px) : 0;
+            alignment: center;
+
+            if root.has-icon: Image {
+                source: root.icon;
+                width: 16px;
+                height: 16px;
+                y: (parent.height - self.height) / 2;
+                colorize: root.text-color;
+                accessible-role: none;
+            }
+
+            i-label := Text {
+                text: root.text;
+                color: root.text-color;
+                font-size: 14px;
+                font-weight: 500;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                accessible-role: none;
+            }
+        }
+
+        if root.variant == ButtonVariant.link && root.hovered && root.has-text: Rectangle {
+            x: i-layout.x + i-label.x;
+            y: i-layout.y + i-label.y + i-label.height / 2 + 9px;
+            width: i-label.width;
+            height: 1px;
+            background: root.text-color;
+        }
+    }
+
+    i-touch-area := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+
+    i-focus-scope := FocusScope {
+        x: 0;
+        width: 0;
+        enabled <=> root.enabled;
+
+        focus-gained(reason) => {
+            if reason != FocusReason.window-activation {
+                root.keyboard-focus = reason == FocusReason.tab-navigation;
+            }
+        }
+
+        key-pressed(event) => {
+            if event.text == Key.Space || event.text == Key.Return {
+                i-touch-area.clicked();
+                return accept;
+            }
+            return reject;
+        }
+    }
+}

@@ -5,6 +5,12 @@ edition = "2024"
 publish = false
 license = "GPL-3.0-or-later"
 
+[features]
+default = ["live-preview", "mcp", "system-testing"]
+live-preview = ["slint/live-preview"]
+mcp = ["slint/mcp"]
+system-testing = ["slint/system-testing"]
+
 [dependencies]
 slint = "1.18"
 

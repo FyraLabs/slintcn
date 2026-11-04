@@ -1,0 +1,42 @@
+[
+  {
+    "label": "Debug gallery",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": {
+      "command": "cargo",
+      "args": ["build", "-p", "slintcn-gallery"]
+    },
+    "program": "$ZED_WORKTREE_ROOT/target/debug/slintcn-gallery",
+    "env": {
+      "SLINT_EMIT_DEBUG_INFO": "1"
+    },
+    "sourceLanguages": ["rust"]
+  },
+  {
+    "label": "Debug gallery (MCP server on :9315)",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": {
+      "command": "cargo",
+      "args": ["build", "-p", "slintcn-gallery"]
+    },
+    "program": "$ZED_WORKTREE_ROOT/target/debug/slintcn-gallery",
+    "env": {
+      "SLINT_EMIT_DEBUG_INFO": "1",
+      "SLINT_MCP_PORT": "9315"
+    },
+    "sourceLanguages": ["rust"]
+  },
+  {
+    "label": "Debug gallery (no default features)",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": {
+      "command": "cargo",
+      "args": ["build", "-p", "slintcn-gallery", "--no-default-features"]
+    },
+    "program": "$ZED_WORKTREE_ROOT/target/debug/slintcn-gallery",
+    "sourceLanguages": ["rust"]
+  }
+]

@@ -1,0 +1,2 @@
+[env]
+SLINT_EMIT_DEBUG_INFO = "1"

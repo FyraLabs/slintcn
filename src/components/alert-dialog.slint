@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { Button } from "std-widgets.slint";
+import { Button, ButtonVariant } from "button.slint";
 import { Dialog, DialogFooter } from "dialog.slint";
 
 export component AlertDialog {
@@ -8,6 +8,7 @@ export component AlertDialog {
     in property <string> description;
     in property <string> cancel-text: "Cancel";
     in property <string> action-text: "Continue";
+    in property <bool> destructive;
     out property <bool> is-open: i-dialog.is-open;
 
     width: 100%;
@@ -34,6 +35,7 @@ export component AlertDialog {
         DialogFooter {
             Button {
                 text: root.cancel-text;
+                variant: ButtonVariant.outline;
                 clicked => {
                     i-dialog.close();
                     root.cancel();
@@ -42,7 +44,7 @@ export component AlertDialog {
 
             Button {
                 text: root.action-text;
-                primary: true;
+                variant: root.destructive ? ButtonVariant.destructive : ButtonVariant.default;
                 clicked => {
                     i-dialog.close();
                     root.action();
