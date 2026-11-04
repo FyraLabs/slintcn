@@ -33,7 +33,7 @@ my-app/
       button.slint, card.slint, alert.slint, dialog.slint, …
 ```
 
-You can copy single components. Every component needs `styling.slint`. Keep `_x.svg` next to it, since the Dialog's close button uses it. AlertDialog also needs `dialog.slint` and `button.slint`.
+You can copy single components. Every component needs `styling.slint`. Keep `_x.svg` next to it, since the Dialog's close button uses it. AlertDialog also needs `dialog.slint` and `button.slint`. Checkbox needs `_check.svg` next to `checkbox.slint`.
 
 ### 2. Map the `@slintcn` library
 
@@ -126,9 +126,23 @@ There's no automatic upgrade. Compare your copy with the latest `src/components/
 | `AlertDialog` | `@slintcn/alert-dialog.slint` | draft |
 | `Button`, `ButtonVariant`, `ButtonSize` | `@slintcn/button.slint` | draft |
 | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` | `@slintcn/card.slint` | draft |
+| `Checkbox` | `@slintcn/checkbox.slint` | draft |
 | `Dialog`, `DialogFooter` | `@slintcn/dialog.slint` | draft |
 | `SlintcnPalette`, `SlintcnSizeSettings` (colors, dark/light, radii) | `@slintcn/styling.slint` | draft |
 | `Switch`, `SwitchSize` | `@slintcn/switch.slint` | draft |
+
+### Checkbox
+
+```slint
+import { Checkbox } from "@slintcn/checkbox.slint";
+
+Checkbox {
+    accessible-label: "Accept terms and conditions";
+    toggled(checked) => { debug("Terms accepted:", checked); }
+}
+```
+
+Bind `checked` with `<=>` to share state with your app. `toggled(bool)` fires on user activation, not programmatic changes. Use `enabled: false` to disable it and `invalid: true` for validation styling. Place labels and descriptions alongside the checkbox; `accessible-label` gives it a screen-reader label. Mouse, Space/Enter, and accessibility activation toggle it; Tab focus shows a focus ring.
 
 ### Switch
 

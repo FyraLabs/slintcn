@@ -6,6 +6,7 @@ import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
 import { Input } from "@slintcn/input.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
 import { Switch, SwitchSize } from "@slintcn/switch.slint";
+import { Checkbox } from "@slintcn/checkbox.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -86,6 +87,29 @@ export component Gallery inherits Window {
             Switch { checked: true; invalid: true; accessible-label: "Invalid checked"; }
             Switch { size: SwitchSize.sm; accessible-label: "Small"; }
             Switch { size: SwitchSize.sm; checked: true; accessible-label: "Small checked"; }
+        }
+
+        HorizontalLayout {
+            spacing: 24px;
+            alignment: start;
+            cross-axis-alignment: center;
+
+            HorizontalLayout {
+                spacing: 8px;
+                cross-axis-alignment: center;
+
+                accept-terms := Checkbox {
+                    accessible-label: "Accept terms and conditions";
+                    toggled(checked) => { root.last-result = checked ? "Terms accepted" : "Terms unchecked"; }
+                }
+                Text { text: "Accept terms and conditions"; color: SlintcnPalette.foreground; font-size: 14px; }
+            }
+
+            Checkbox { checked: true; accessible-label: "Checked checkbox"; }
+            Checkbox { enabled: false; accessible-label: "Disabled checkbox"; }
+            Checkbox { checked: true; enabled: false; accessible-label: "Disabled checked checkbox"; }
+            Checkbox { invalid: true; accessible-label: "Invalid checkbox"; }
+            Checkbox { checked: true; invalid: true; accessible-label: "Invalid checked checkbox"; }
         }
 
         HorizontalLayout {
