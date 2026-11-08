@@ -2,11 +2,11 @@ import { ScrollArea } from "@slintcn/scroll-area.slint";
 import { Alert, AlertVariant } from "@slintcn/alert.slint";
 import { AlertDialog } from "@slintcn/alert-dialog.slint";
 import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@slintcn/card.slint";
 import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
 import { FieldExamples } from "fields.slint";
 import { ButtonGroupExamples } from "button-groups.slint";
+import { CardExamples } from "cards.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -66,33 +66,8 @@ export component Gallery inherits Window {
                 changed(message) => { root.last-result = message; }
             }
 
-            HorizontalLayout {
-                alignment: start;
-
-                Card {
-                    width: 360px;
-
-                    CardHeader {
-                        CardTitle { text: "Create project"; }
-                        CardDescription { text: "Lorem Ipsum dolor sit amet consectetur adipiscing elit."; }
-                    }
-
-                    CardContent {
-                        Text {
-                            text: "Lorem Ipsum dolor sit amet consectetur adipiscing elit.";
-                            color: SlintcnPalette.card-foreground;
-                            wrap: word-wrap;
-                        }
-                    }
-
-                    CardFooter {
-                        spacing: 8px;
-                        alignment: end;
-
-                        Button { text: "Cancel"; variant: ButtonVariant.outline; }
-                        Button { text: "Deploy"; }
-                    }
-                }
+            CardExamples {
+                clicked(message) => { root.last-result = message; }
             }
 
             VerticalLayout {

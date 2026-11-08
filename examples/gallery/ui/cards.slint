@@ -1,0 +1,225 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
+import { Card, CardContent, CardFooter, CardHeader, CardSize } from "@slintcn/card.slint";
+import { Field, FieldLabel } from "@slintcn/field.slint";
+import { Input } from "@slintcn/input.slint";
+import { SlintcnPalette } from "@slintcn/styling.slint";
+
+component ListItem inherits HorizontalLayout {
+    in property <string> text;
+
+    spacing: 8px;
+
+    Image {
+        y: 2px;
+        width: 16px;
+        height: 16px;
+        source: @image-url("icons/chevron-right.svg");
+        colorize: SlintcnPalette.muted-foreground;
+        accessible-role: none;
+    }
+
+    Text {
+        text: root.text;
+        color: SlintcnPalette.card-foreground;
+        font-size: 14px;
+        wrap: word-wrap;
+        horizontal-stretch: 1;
+    }
+}
+
+export component CardExamples inherits VerticalLayout {
+    callback clicked(string);
+    spacing: 24px;
+    alignment: start;
+    vertical-stretch: 0;
+
+    HorizontalLayout {
+        spacing: 24px;
+        alignment: start;
+
+        Card {
+            width: 384px;
+
+            CardHeader {
+                title: "Login to your account";
+                description: "Enter your email below to login to your account";
+
+                Button {
+                    text: "Sign Up";
+                    variant: ButtonVariant.link;
+                    clicked => { root.clicked("Sign up"); }
+                }
+            }
+
+            CardContent {
+                spacing: 24px;
+
+                Field {
+                    accessible-label: email-label.text;
+
+                    email-label := FieldLabel {
+                        text: "Email";
+                        clicked => { email.focus(); }
+                    }
+                    email := Input {
+                        placeholder-text: "m@example.com";
+                        accessible-label: email-label.text;
+                    }
+                }
+
+                Field {
+                    accessible-label: password-label.text;
+
+                    HorizontalLayout {
+                        password-label := FieldLabel {
+                            text: "Password";
+                            clicked => { password.focus(); }
+                        }
+                        Rectangle { horizontal-stretch: 1; }
+                        Text {
+                            text: "Forgot your password?";
+                            color: SlintcnPalette.card-foreground;
+                            font-size: 14px;
+                            vertical-alignment: center;
+                        }
+                    }
+                    password := Input {
+                        input-type: InputType.password;
+                        accessible-label: password-label.text;
+                    }
+                }
+            }
+
+            CardFooter {
+                orientation: Orientation.vertical;
+                spacing: 8px;
+
+                Button {
+                    text: "Login";
+                    clicked => { root.clicked("Login"); }
+                }
+                Button {
+                    text: "Login with Google";
+                    variant: ButtonVariant.outline;
+                }
+            }
+        }
+
+        VerticalLayout {
+            spacing: 24px;
+            alignment: start;
+            width: 384px;
+
+            Card {
+                CardHeader {
+                    title: "Create project";
+                    description: "Deploy your new project in one click.";
+                    divider: true;
+                }
+
+                CardContent {
+                    Text {
+                        text: "Your project will build from the main branch and deploy to production.";
+                        color: SlintcnPalette.card-foreground;
+                        font-size: 14px;
+                        wrap: word-wrap;
+                    }
+                }
+
+                CardFooter {
+                    spacing: 8px;
+                    alignment: end;
+                    divider: true;
+
+                    Button { text: "Cancel"; variant: ButtonVariant.outline; }
+                    Button {
+                        text: "Deploy";
+                        clicked => { root.clicked("Deployed"); }
+                    }
+                }
+            }
+
+            Card {
+                CardContent {
+                    Text {
+                        text: "A card with only content.";
+                        color: SlintcnPalette.card-foreground;
+                        font-size: 14px;
+                        wrap: word-wrap;
+                    }
+                }
+            }
+        }
+    }
+
+    HorizontalLayout {
+        spacing: 24px;
+        alignment: start;
+
+        Card {
+            width: 384px;
+            image: @image-url("images/cover.svg");
+
+            CardHeader {
+                title: "Design systems meetup";
+                description: "A practical talk on component APIs, accessibility, and shipping faster.";
+            }
+
+            CardFooter {
+                orientation: Orientation.vertical;
+
+                Button {
+                    text: "View Event";
+                    clicked => { root.clicked("Viewing event"); }
+                }
+            }
+        }
+
+        Card {
+            width: 320px;
+            size: CardSize.sm;
+
+            CardHeader {
+                size: CardSize.sm;
+                title: "Scheduled reports";
+                description: "Weekly snapshots. No more manual exports.";
+            }
+
+            CardContent {
+                size: CardSize.sm;
+                padding-top: 8px;
+                padding-bottom: 8px;
+                spacing: 8px;
+
+                ListItem { text: "Choose a schedule (daily, or weekly)."; }
+                ListItem { text: "Send to channels or specific teammates."; }
+                ListItem { text: "Include charts, tables, and key metrics."; }
+            }
+
+            CardFooter {
+                size: CardSize.sm;
+                orientation: Orientation.vertical;
+                spacing: 8px;
+
+                Button { text: "Set up scheduled reports"; size: ButtonSize.sm; }
+                Button { text: "See what's new"; size: ButtonSize.sm; variant: ButtonVariant.outline; }
+            }
+        }
+    }
+}
+
+export component CardPreview inherits Window {
+    in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+
+    title: "slintcn cards";
+    width: 856px;
+    height: 1040px;
+    background: SlintcnPalette.background;
+
+    VerticalLayout {
+        padding: 32px;
+        alignment: start;
+        CardExamples {}
+    }
+}

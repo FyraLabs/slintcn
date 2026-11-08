@@ -2,50 +2,206 @@
 
 import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
 
+export enum CardSize {
+    default,
+    sm,
+}
+
 export component Card {
+    in property <CardSize> size;
+    in property <image> image;
+
+    property <length> spacing: root.size == CardSize.sm ? 16px : 24px;
+    property <bool> has-image: root.image.width > 0 && root.image.height > 0;
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: groupbox;
+
+    // shadow-sm's second layer: 0 1px 2px -1px, with the -1px spread as a 1px inset.
     Rectangle {
+        x: 1px;
+        y: 1px;
+        width: root.width - 2px;
+        height: root.height - 2px;
+        border-radius: SlintcnSizeSettings.radius-xl - 1px;
         background: SlintcnPalette.card;
+        drop-shadow-offset-y: 1px;
+        drop-shadow-blur: 2px;
+        drop-shadow-color: #0000001a;
+    }
+
+    Rectangle {
         border-radius: SlintcnSizeSettings.radius-xl;
-        border-width: 1px;
-        border-color: SlintcnPalette.border;
+        background: SlintcnPalette.card;
         drop-shadow-offset-y: 1px;
         drop-shadow-blur: 3px;
         drop-shadow-color: #0000001a;
     }
 
-    VerticalLayout {
-        padding-top: 24px;
-        padding-bottom: 24px;
-        spacing: 24px;
+    i-layout := VerticalLayout {
+        padding-top: root.has-image ? 0 : root.spacing;
+        padding-bottom: root.spacing;
+        spacing: root.spacing;
+        alignment: start;
+
+        if root.has-image: Rectangle {
+            height: root.width * 9 / 16;
+            border-top-left-radius: SlintcnSizeSettings.radius-xl;
+            border-top-right-radius: SlintcnSizeSettings.radius-xl;
+            clip: true;
+
+            Image {
+                source: root.image;
+                image-fit: cover;
+                accessible-role: none;
+            }
+        }
 
         @children
     }
+
+    Rectangle {
+        border-radius: SlintcnSizeSettings.radius-xl;
+        border-width: 1px;
+        border-color: SlintcnPalette.border;
+    }
 }
 
-export component CardHeader inherits VerticalLayout {
-    padding-left: 24px;
-    padding-right: 24px;
-    spacing: 8px;
+export component CardTitle {
+    in property <string> text <=> i-text.text;
+    in property <length> font-size: 16px;
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: AccessibleRole.text;
+    accessible-label: root.text;
+
+    // leading-none: trim the half-leading above the first line and below the last.
+    property <length> half-leading: (i-text.font-metrics.ascent - i-text.font-metrics.descent - root.font-size) / 2;
+
+    VerticalLayout {
+        padding-top: -root.half-leading;
+        padding-bottom: -root.half-leading;
+
+        i-text := Text {
+            color: SlintcnPalette.card-foreground;
+            font-size: root.font-size;
+            font-weight: 600;
+            wrap: word-wrap;
+            accessible-role: none;
+        }
+    }
 }
 
-export component CardTitle inherits Text {
-    color: SlintcnPalette.card-foreground;
-    font-size: 16px;
-    font-weight: 600;
+export component CardDescription {
+    in property <string> text <=> i-text.text;
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: AccessibleRole.text;
+    accessible-label: root.text;
+
+    // Measures the natural line height, which i-text can't read from itself.
+    i-metrics := Text {
+        visible: false;
+        font-size: 14px;
+    }
+
+    VerticalLayout {
+        i-text := Text {
+            color: SlintcnPalette.muted-foreground;
+            font-size: 14px;
+            line-height-factor: 20px / (i-metrics.font-metrics.ascent - i-metrics.font-metrics.descent);
+            wrap: word-wrap;
+            accessible-role: none;
+        }
+    }
 }
 
-export component CardDescription inherits Text {
-    color: SlintcnPalette.muted-foreground;
-    font-size: 14px;
-    wrap: word-wrap;
+// Children go in the action slot beside the title and description.
+export component CardHeader {
+    in property <string> title;
+    in property <string> description;
+    in property <CardSize> size;
+    in property <bool> divider;
+
+    property <length> spacing: root.size == CardSize.sm ? 16px : 24px;
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    i-layout := HorizontalLayout {
+        padding-left: root.spacing;
+        padding-right: root.spacing;
+        padding-bottom: root.divider ? root.spacing : 0;
+        spacing: 8px;
+
+        VerticalLayout {
+            spacing: 8px;
+            alignment: start;
+            horizontal-stretch: 1;
+
+            if root.title != "": CardTitle {
+                text: root.title;
+                font-size: root.size == CardSize.sm ? 14px : 16px;
+            }
+            if root.description != "": CardDescription { text: root.description; }
+        }
+
+        VerticalLayout {
+            alignment: start;
+            horizontal-stretch: 0;
+
+            @children
+        }
+    }
+
+    if root.divider: Rectangle {
+        y: parent.height - 1px;
+        height: 1px;
+        background: SlintcnPalette.border;
+    }
 }
 
 export component CardContent inherits VerticalLayout {
-    padding-left: 24px;
-    padding-right: 24px;
+    in property <CardSize> size;
+
+    padding-left: root.size == CardSize.sm ? 16px : 24px;
+    padding-right: self.padding-left;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
 }
 
-export component CardFooter inherits HorizontalLayout {
-    padding-left: 24px;
-    padding-right: 24px;
+export component CardFooter {
+    in property <CardSize> size;
+    in property <Orientation> orientation;
+    in property <length> spacing;
+    in property <LayoutAlignment> alignment: start;
+    in property <bool> divider;
+
+    property <length> inset: root.size == CardSize.sm ? 16px : 24px;
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    if root.divider: Rectangle {
+        y: 0;
+        height: 1px;
+        background: SlintcnPalette.border;
+    }
+
+    i-layout := FlexboxLayout {
+        flex-direction: root.orientation == Orientation.vertical ? column : row;
+        flex-wrap: no-wrap;
+        alignment: root.alignment;
+        spacing-horizontal: root.spacing;
+        spacing-vertical: root.spacing;
+        cross-axis-alignment: root.orientation == Orientation.vertical ? stretch : center;
+        padding-left: root.inset;
+        padding-right: root.inset;
+        padding-top: root.divider ? root.inset : 0;
+
+        @children
+    }
 }

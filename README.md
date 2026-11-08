@@ -82,14 +82,14 @@ Restart the language server after changing the setting. VS Code takes the same v
 
 ```slint
 import { Button, ButtonVariant } from "@slintcn/button.slint";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@slintcn/card.slint";
+import { Card, CardHeader, CardContent, CardFooter } from "@slintcn/card.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
 
 export component App inherits Window {
     background: SlintcnPalette.background;
 
     Card {
-        CardHeader { CardTitle { text: "Hello"; } }
+        CardHeader { title: "Hello"; }
         CardContent { Text { text: "Card content."; color: SlintcnPalette.card-foreground; } }
         CardFooter {
             spacing: 8px;
@@ -113,20 +113,6 @@ export component App inherits Window {
     init => { SlintcnPalette.color-scheme = ColorScheme.dark; }
 }
 ```
-
-## Button groups
-
-Slint components can't see their children, so a `ButtonGroup` can't restyle the buttons inside it. Tell each item where it sits with `group-position`. In a vertical group, also set `group-orientation`. `Button`, `Input` and `ButtonGroupText` take both properties.
-
-```slint
-ButtonGroup {
-    Button { text: "Archive"; variant: ButtonVariant.outline; group-position: GroupPosition.first; }
-    Button { text: "Snooze"; variant: ButtonVariant.outline; group-position: GroupPosition.middle; }
-    Button { text: "Report"; variant: ButtonVariant.outline; group-position: GroupPosition.last; }
-}
-```
-
-To nest groups, as shadcn does, put them in a layout with `spacing: 8px`.
 
 ## Updating
 
