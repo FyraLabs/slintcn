@@ -1,0 +1,136 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Button, ButtonVariant } from "@slintcn/button.slint";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioItem, DropdownMenuSeparator } from "@slintcn/dropdown-menu.slint";
+import { Field, FieldLabel } from "@slintcn/field.slint";
+import { Input } from "@slintcn/input.slint";
+import { Popover, PopoverDescription, PopoverHeader, PopoverTitle } from "@slintcn/popover.slint";
+import { PopupAlign, PopupSide, SlintcnPalette } from "@slintcn/styling.slint";
+
+export component MenuExamples inherits HorizontalLayout {
+    callback clicked(string);
+
+    property <string> panel-position: "bottom";
+    property <bool> status-bar: true;
+    property <bool> activity-bar;
+
+    spacing: 8px;
+    alignment: start;
+    vertical-stretch: 0;
+
+    Rectangle {
+        Button {
+            text: "View";
+            variant: ButtonVariant.outline;
+            icon: @image-url("icons/chevron-down.svg");
+            clicked => { view-menu.show(); }
+        }
+
+        view-menu := DropdownMenu {
+            align: PopupAlign.start;
+            min-content-width: 224px;
+
+            DropdownMenuLabel { text: "Appearance"; }
+            DropdownMenuSeparator {}
+            DropdownMenuCheckboxItem {
+                text: "Status bar";
+                shortcut: "⌘B";
+                checked <=> root.status-bar;
+                toggled(checked) => { root.clicked(checked ? "Status bar shown" : "Status bar hidden"); }
+            }
+            DropdownMenuCheckboxItem {
+                text: "Activity bar";
+                checked <=> root.activity-bar;
+                toggled(checked) => { root.clicked(checked ? "Activity bar shown" : "Activity bar hidden"); }
+            }
+            DropdownMenuCheckboxItem {
+                text: "Minimap";
+                enabled: false;
+            }
+            DropdownMenuSeparator {}
+
+            DropdownMenuLabel { text: "Panel position"; }
+            DropdownMenuGroup {
+                DropdownMenuRadioItem {
+                    text: "Top";
+                    checked: root.panel-position == "top";
+                    activated => { root.panel-position = "top"; }
+                }
+                DropdownMenuRadioItem {
+                    text: "Bottom";
+                    checked: root.panel-position == "bottom";
+                    activated => { root.panel-position = "bottom"; }
+                }
+                DropdownMenuRadioItem {
+                    text: "Right";
+                    checked: root.panel-position == "right";
+                    activated => { root.panel-position = "right"; }
+                }
+            }
+            DropdownMenuSeparator {}
+            DropdownMenuItem { text: "Reset layout"; inset: true; enabled: false; }
+        }
+    }
+
+    Rectangle {
+        Button {
+            text: "Dimensions";
+            variant: ButtonVariant.outline;
+            clicked => { dimensions-popover.show(); }
+        }
+
+        dimensions-popover := Popover {
+            side: PopupSide.right;
+            align: PopupAlign.start;
+
+            PopoverHeader {
+                PopoverTitle { text: "Dimensions"; }
+                PopoverDescription { text: "Set the dimensions for the layer."; }
+            }
+
+            HorizontalLayout {
+                spacing: 16px;
+
+                Field {
+                    accessible-label: width-label.text;
+
+                    width-label := FieldLabel {
+                        text: "Width";
+                        clicked => { width-input.focus(); }
+                    }
+                    width-input := Input {
+                        text: "100%";
+                        accessible-label: width-label.text;
+                    }
+                }
+
+                Field {
+                    accessible-label: height-label.text;
+
+                    height-label := FieldLabel {
+                        text: "Height";
+                        clicked => { height-input.focus(); }
+                    }
+                    height-input := Input {
+                        text: "25px";
+                        accessible-label: height-label.text;
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component MenuPreview inherits Window {
+    in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+
+    title: "slintcn menus";
+    width: 720px;
+    height: 380px;
+    background: SlintcnPalette.background;
+
+    VerticalLayout {
+        padding: 32px;
+        alignment: start;
+        MenuExamples {}
+    }
+}

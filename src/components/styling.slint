@@ -11,6 +11,8 @@ export global SlintcnPalette {
     out property <color> foreground: dark ? #fafafa : #0a0a0a;
     out property <color> card: dark ? #171717 : #ffffff;
     out property <color> card-foreground: dark ? #fafafa : #0a0a0a;
+    out property <color> popover: dark ? #171717 : #ffffff;
+    out property <color> popover-foreground: dark ? #fafafa : #0a0a0a;
     out property <color> primary: dark ? #e5e5e5 : #171717;
     out property <color> primary-foreground: dark ? #171717 : #fafafa;
     out property <color> secondary: dark ? #262626 : #f5f5f5;
@@ -38,6 +40,19 @@ export enum GroupPosition {
     first,
     middle,
     last,
+}
+
+export enum PopupSide {
+    bottom,
+    top,
+    left,
+    right,
+}
+
+export enum PopupAlign {
+    center,
+    start,
+    end,
 }
 
 export global SlintcnIcons {

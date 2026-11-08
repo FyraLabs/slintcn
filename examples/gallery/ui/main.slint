@@ -7,6 +7,7 @@ import { SlintcnPalette } from "@slintcn/styling.slint";
 import { FieldExamples } from "fields.slint";
 import { ButtonGroupExamples } from "button-groups.slint";
 import { CardExamples } from "cards.slint";
+import { MenuExamples } from "menus.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -58,6 +59,10 @@ export component Gallery inherits Window {
             }
 
             ButtonGroupExamples {
+                clicked(message) => { root.last-result = message; }
+            }
+
+            MenuExamples {
                 clicked(message) => { root.last-result = message; }
             }
 

@@ -1,0 +1,340 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { PopupAlign, PopupSide, SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export enum DropdownMenuItemVariant {
+    default,
+    destructive,
+}
+
+// Items can't reach their menu, so activating one bumps this and every open menu closes.
+global DropdownMenuActivation {
+    in-out property <int> count;
+}
+
+// Place in a container next to the trigger; the menu opens beside that container.
+export component DropdownMenu {
+    in property <PopupSide> side: PopupSide.bottom;
+    in property <PopupAlign> align: PopupAlign.center;
+    in property <length> side-offset: 4px;
+    in property <length> min-content-width: 128px;
+    out property <bool> is-open: i-popup.is-open;
+
+    property <length> margin: 16px;
+    property <int> activations: DropdownMenuActivation.count;
+
+    width: 100%;
+    height: 100%;
+
+    changed activations => {
+        i-popup.close();
+    }
+
+    public function show() {
+        i-popup.show();
+    }
+
+    public function close() {
+        i-popup.close();
+    }
+
+    i-popup := PopupWindow {
+        property <length> panel-width: max(root.min-content-width, i-layout.preferred-width);
+        property <length> panel-height: i-layout.preferred-height;
+
+        close-policy: close-on-click-outside;
+        width: self.panel-width + 2 * root.margin;
+        height: self.panel-height + 2 * root.margin;
+        x: -root.margin + (root.side == PopupSide.left ? -self.panel-width - root.side-offset
+            : root.side == PopupSide.right ? root.width + root.side-offset
+            : root.align == PopupAlign.start ? 0
+            : root.align == PopupAlign.end ? root.width - self.panel-width
+            : (root.width - self.panel-width) / 2);
+        y: -root.margin + (root.side == PopupSide.top ? -self.panel-height - root.side-offset
+            : root.side == PopupSide.bottom ? root.height + root.side-offset
+            : root.align == PopupAlign.start ? 0
+            : root.align == PopupAlign.end ? root.height - self.panel-height
+            : (root.height - self.panel-height) / 2);
+
+        i-focus-scope := FocusScope {
+            property <bool> entered;
+
+            init => {
+                self.focus();
+                self.entered = true;
+            }
+
+            i-panel := Rectangle {
+                x: root.margin + (i-focus-scope.entered ? 0 : root.side == PopupSide.left ? 8px : root.side == PopupSide.right ? -8px : 0);
+                y: root.margin + (i-focus-scope.entered ? 0 : root.side == PopupSide.top ? 8px : root.side == PopupSide.bottom ? -8px : 0);
+                width: i-popup.panel-width;
+                height: i-popup.panel-height;
+                background: SlintcnPalette.popover;
+                border-radius: SlintcnSizeSettings.radius-md;
+                border-width: 1px;
+                border-color: SlintcnPalette.border;
+                drop-shadow-offset-y: 4px;
+                drop-shadow-blur: 6px;
+                drop-shadow-color: #0000001a;
+                opacity: i-focus-scope.entered ? 1 : 0;
+                transform-scale: i-focus-scope.entered ? 1 : 0.95;
+                accessible-role: list;
+                animate x, y, opacity, transform-scale { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+
+                TouchArea {}
+
+                i-layout := VerticalLayout {
+                    padding: 4px;
+
+                    @children
+                }
+            }
+        }
+    }
+}
+
+export component DropdownMenuGroup inherits VerticalLayout {
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+}
+
+export component DropdownMenuLabel {
+    in property <string> text;
+    in property <bool> inset;
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    HorizontalLayout {
+        padding-left: root.inset ? 32px : 8px;
+        padding-right: 8px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+
+        Text {
+            text: root.text;
+            color: SlintcnPalette.popover-foreground;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    }
+}
+
+export component DropdownMenuSeparator {
+    min-height: 9px;
+    max-height: 9px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: none;
+
+    Rectangle {
+        x: -4px;
+        y: 4px;
+        width: parent.width + 8px;
+        height: 1px;
+        background: SlintcnPalette.border;
+    }
+}
+
+component MenuItemBase {
+    in property <string> text;
+    in property <image> icon;
+    in property <string> shortcut;
+    in property <bool> enabled: true;
+    in property <bool> inset;
+    in property <bool> destructive;
+
+    callback activated();
+
+    property <bool> dark: SlintcnPalette.color-scheme == ColorScheme.dark;
+    property <bool> highlighted: root.enabled && (i-touch-area.has-hover || i-focus-scope.has-focus);
+    property <bool> has-icon: root.icon.width > 0 && root.icon.height > 0;
+
+    min-width: i-layout.min-width;
+    min-height: 32px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    public function activate() {
+        if root.enabled {
+            root.activated();
+            DropdownMenuActivation.count += 1;
+        }
+    }
+
+    i-background := Rectangle {
+        border-radius: SlintcnSizeSettings.radius-sm;
+        background: !root.highlighted ? transparent : root.destructive ? SlintcnPalette.destructive.transparentize(root.dark ? 0.8 : 0.9) : SlintcnPalette.accent;
+    }
+
+    @children
+
+    i-layout := HorizontalLayout {
+        padding-left: root.inset ? 32px : 8px;
+        padding-right: 8px;
+        spacing: 8px;
+        opacity: root.enabled ? 1 : 0.5;
+
+        if root.has-icon: Image {
+            y: (parent.height - self.height) / 2;
+            width: 16px;
+            height: 16px;
+            source: root.icon;
+            colorize: root.destructive ? SlintcnPalette.destructive : SlintcnPalette.muted-foreground;
+            accessible-role: none;
+        }
+
+        Text {
+            text: root.text;
+            color: root.destructive ? SlintcnPalette.destructive : root.highlighted ? SlintcnPalette.accent-foreground : SlintcnPalette.popover-foreground;
+            font-size: 14px;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+        }
+
+        if root.shortcut != "": Text {
+            text: root.shortcut;
+            color: SlintcnPalette.muted-foreground;
+            font-size: 12px;
+            letter-spacing: 1.2px;
+            vertical-alignment: center;
+            horizontal-stretch: 0;
+        }
+    }
+
+    i-touch-area := TouchArea {
+        enabled: root.enabled;
+        clicked => { root.activate(); }
+
+        changed has-hover => {
+            if self.has-hover {
+                i-focus-scope.focus();
+            } else if i-focus-scope.has-focus {
+                i-focus-scope.clear-focus();
+            }
+        }
+    }
+
+    i-focus-scope := FocusScope {
+        x: 0;
+        width: 0;
+        enabled: root.enabled;
+
+        key-pressed(event) => {
+            if event.text == Key.Return || event.text == Key.Space {
+                root.activate();
+                return accept;
+            }
+            return reject;
+        }
+    }
+}
+
+export component DropdownMenuItem {
+    in property <string> text;
+    in property <image> icon;
+    in property <string> shortcut;
+    in property <bool> enabled: true;
+    in property <bool> inset;
+    in property <DropdownMenuItemVariant> variant;
+
+    callback activated();
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: list-item;
+    accessible-label: root.text;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { i-base.activate(); }
+
+    HorizontalLayout {
+        i-base := MenuItemBase {
+            text: root.text;
+            icon: root.icon;
+            shortcut: root.shortcut;
+            enabled: root.enabled;
+            inset: root.inset;
+            destructive: root.variant == DropdownMenuItemVariant.destructive;
+            activated => { root.activated(); }
+        }
+    }
+}
+
+export component DropdownMenuCheckboxItem {
+    in property <string> text;
+    in property <string> shortcut;
+    in property <bool> enabled: true;
+    in-out property <bool> checked;
+
+    callback toggled(checked: bool);
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: checkbox;
+    accessible-label: root.text;
+    accessible-checkable: true;
+    accessible-checked: root.checked;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { i-base.activate(); }
+
+    HorizontalLayout {
+        i-base := MenuItemBase {
+            text: root.text;
+            shortcut: root.shortcut;
+            enabled: root.enabled;
+            inset: true;
+            activated => {
+                root.checked = !root.checked;
+                root.toggled(root.checked);
+            }
+
+            if root.checked: Image {
+                x: 8px;
+                y: (parent.height - self.height) / 2;
+                width: 16px;
+                height: 16px;
+                source: @image-url("_check.svg");
+                colorize: SlintcnPalette.popover-foreground;
+                opacity: root.enabled ? 1 : 0.5;
+                accessible-role: none;
+            }
+        }
+    }
+}
+
+export component DropdownMenuRadioItem {
+    in property <string> text;
+    in property <string> shortcut;
+    in property <bool> enabled: true;
+    in property <bool> checked;
+
+    callback activated();
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: radio-button;
+    accessible-label: root.text;
+    accessible-checkable: true;
+    accessible-checked: root.checked;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { i-base.activate(); }
+
+    HorizontalLayout {
+        i-base := MenuItemBase {
+            text: root.text;
+            shortcut: root.shortcut;
+            enabled: root.enabled;
+            inset: true;
+            activated => { root.activated(); }
+
+            if root.checked: Rectangle {
+                x: 12px;
+                y: (parent.height - self.height) / 2;
+                width: 8px;
+                height: 8px;
+                border-radius: 4px;
+                background: SlintcnPalette.popover-foreground;
+                opacity: root.enabled ? 1 : 0.5;
+            }
+        }
+    }
+}

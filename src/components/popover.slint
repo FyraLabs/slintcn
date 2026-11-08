@@ -1,0 +1,103 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { PopupAlign, PopupSide, SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export component PopoverHeader inherits VerticalLayout {
+    spacing: 4px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+}
+
+export component PopoverTitle inherits Text {
+    color: SlintcnPalette.popover-foreground;
+    font-size: 14px;
+    font-weight: 500;
+    wrap: word-wrap;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+}
+
+export component PopoverDescription inherits Text {
+    color: SlintcnPalette.muted-foreground;
+    font-size: 14px;
+    wrap: word-wrap;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+}
+
+// Place in a container next to the trigger; the content opens beside that container.
+export component Popover {
+    in property <PopupSide> side: PopupSide.bottom;
+    in property <PopupAlign> align: PopupAlign.center;
+    in property <length> side-offset: 4px;
+    in property <length> content-width: 288px;
+    in property <length> spacing: 16px;
+    out property <bool> is-open: i-popup.is-open;
+
+    // Room around the panel for its shadow.
+    property <length> margin: 16px;
+
+    width: 100%;
+    height: 100%;
+
+    public function show() {
+        i-popup.show();
+    }
+
+    public function close() {
+        i-popup.close();
+    }
+
+    i-popup := PopupWindow {
+        property <length> panel-height: i-layout.preferred-height;
+        property <bool> horizontal-side: root.side == PopupSide.left || root.side == PopupSide.right;
+
+        close-policy: close-on-click-outside;
+        width: root.content-width + 2 * root.margin;
+        height: self.panel-height + 2 * root.margin;
+        x: -root.margin + (root.side == PopupSide.left ? -root.content-width - root.side-offset
+            : root.side == PopupSide.right ? root.width + root.side-offset
+            : root.align == PopupAlign.start ? 0
+            : root.align == PopupAlign.end ? root.width - root.content-width
+            : (root.width - root.content-width) / 2);
+        y: -root.margin + (root.side == PopupSide.top ? -self.panel-height - root.side-offset
+            : root.side == PopupSide.bottom ? root.height + root.side-offset
+            : root.align == PopupAlign.start ? 0
+            : root.align == PopupAlign.end ? root.height - self.panel-height
+            : (root.height - self.panel-height) / 2);
+
+        i-focus-scope := FocusScope {
+            property <bool> entered;
+
+            init => {
+                self.focus();
+                self.entered = true;
+            }
+
+            i-panel := Rectangle {
+                x: root.margin + (i-focus-scope.entered ? 0 : root.side == PopupSide.left ? 8px : root.side == PopupSide.right ? -8px : 0);
+                y: root.margin + (i-focus-scope.entered ? 0 : root.side == PopupSide.top ? 8px : root.side == PopupSide.bottom ? -8px : 0);
+                width: root.content-width;
+                height: i-popup.panel-height;
+                background: SlintcnPalette.popover;
+                border-radius: SlintcnSizeSettings.radius-md;
+                border-width: 1px;
+                border-color: SlintcnPalette.border;
+                drop-shadow-offset-y: 4px;
+                drop-shadow-blur: 6px;
+                drop-shadow-color: #0000001a;
+                opacity: i-focus-scope.entered ? 1 : 0;
+                transform-scale: i-focus-scope.entered ? 1 : 0.95;
+                animate x, y, opacity, transform-scale { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+
+                TouchArea {}
+
+                i-layout := VerticalLayout {
+                    padding: 16px;
+                    spacing: root.spacing;
+
+                    @children
+                }
+            }
+        }
+    }
+}

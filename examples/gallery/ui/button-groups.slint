@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
 import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from "@slintcn/button-group.slint";
+import { DropdownMenu, DropdownMenuItem, DropdownMenuItemVariant, DropdownMenuLabel, DropdownMenuSeparator } from "@slintcn/dropdown-menu.slint";
+import { Field, FieldLabel } from "@slintcn/field.slint";
 import { Input } from "@slintcn/input.slint";
-import { GroupPosition, SlintcnPalette } from "@slintcn/styling.slint";
+import { Popover, PopoverDescription, PopoverHeader, PopoverTitle } from "@slintcn/popover.slint";
+import { GroupPosition, PopupAlign, SlintcnPalette } from "@slintcn/styling.slint";
 
 export component ButtonGroupExamples inherits VerticalLayout {
     callback clicked(string);
@@ -25,8 +28,31 @@ export component ButtonGroupExamples inherits VerticalLayout {
         ButtonGroup {
             accessible-label: "Snooze";
 
-            Button { text: "Snooze"; variant: ButtonVariant.outline; group-position: GroupPosition.first; }
-            Button { size: ButtonSize.icon; icon: @image-url("icons/chevron-down.svg"); accessible-label: "More snooze options"; variant: ButtonVariant.outline; group-position: GroupPosition.last; }
+            Button { text: "Snooze"; variant: ButtonVariant.outline; group-position: GroupPosition.first; clicked => { root.clicked("Snoozed until tomorrow"); } }
+
+            Rectangle {
+                Button {
+                    size: ButtonSize.icon;
+                    icon: @image-url("icons/chevron-down.svg");
+                    accessible-label: "More snooze options";
+                    variant: ButtonVariant.outline;
+                    group-position: GroupPosition.last;
+                    clicked => { snooze-menu.show(); }
+                }
+
+                snooze-menu := DropdownMenu {
+                    align: PopupAlign.end;
+
+                    DropdownMenuLabel { text: "Snooze until"; }
+                    DropdownMenuSeparator {}
+                    DropdownMenuItem { text: "Later today"; shortcut: "⌘⇧H"; activated => { root.clicked("Snoozed until later today"); } }
+                    DropdownMenuItem { text: "Tomorrow"; shortcut: "⌘⇧T"; activated => { root.clicked("Snoozed until tomorrow"); } }
+                    DropdownMenuItem { text: "Next week"; activated => { root.clicked("Snoozed until next week"); } }
+                    DropdownMenuSeparator {}
+                    DropdownMenuItem { text: "Mute thread"; icon: @image-url("icons/bell-off.svg"); activated => { root.clicked("Thread muted"); } }
+                    DropdownMenuItem { text: "Delete"; variant: DropdownMenuItemVariant.destructive; activated => { root.clicked("Deleted"); } }
+                }
+            }
         }
     }
 
@@ -90,7 +116,49 @@ export component ButtonGroupExamples inherits VerticalLayout {
                 ButtonGroup {
                     Button { text: "Follow"; group-position: GroupPosition.first; }
                     ButtonGroupSeparator {}
-                    Button { size: ButtonSize.icon; icon: @image-url("icons/plus.svg"); accessible-label: "Follow options"; group-position: GroupPosition.last; }
+                    Rectangle {
+                        Button {
+                            size: ButtonSize.icon;
+                            icon: @image-url("icons/plus.svg");
+                            accessible-label: "Add to list";
+                            group-position: GroupPosition.last;
+                            clicked => { follow-popover.show(); }
+                        }
+
+                        follow-popover := Popover {
+                            align: PopupAlign.end;
+
+                            PopoverHeader {
+                                PopoverTitle { text: "Add to list"; }
+                                PopoverDescription { text: "Follow this account inside a list instead of your home feed."; }
+                            }
+
+                            Field {
+                                accessible-label: list-label.text;
+
+                                list-label := FieldLabel {
+                                    text: "List name";
+                                    clicked => { list-name.focus(); }
+                                }
+                                list-name := Input {
+                                    placeholder-text: "Design";
+                                    accessible-label: list-label.text;
+                                    accepted => {
+                                        follow-popover.close();
+                                        root.clicked("Added to " + self.text);
+                                    }
+                                }
+                            }
+
+                            Button {
+                                text: "Add";
+                                clicked => {
+                                    follow-popover.close();
+                                    root.clicked("Added to list");
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
