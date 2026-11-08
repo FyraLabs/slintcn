@@ -9,13 +9,19 @@ import { ButtonGroupExamples } from "button-groups.slint";
 import { CardExamples } from "cards.slint";
 import { MenuExamples } from "menus.slint";
 
+export { ButtonGroupPreview } from "button-groups.slint";
+export { CardPreview } from "cards.slint";
+export { FieldPreview } from "fields.slint";
+export { MenuPreview } from "menus.slint";
+
 export component Gallery inherits Window {
     title: "slintcn gallery";
     preferred-width: 960px;
     preferred-height: 720px;
     background: SlintcnPalette.background;
 
-    property <string> last-result;
+    in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+    out property <string> last-result;
 
     gallery-scroll := ScrollArea {
         content-width: max(self.visible-width, gallery-content.min-width);

@@ -1,2 +1,6 @@
 [env]
 SLINT_EMIT_DEBUG_INFO = "1"
+
+[alias]
+# Live preview recompiles the UI at runtime, which the testing backend doesn't need.
+ui-test = "test -p slintcn-gallery --no-default-features"

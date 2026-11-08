@@ -4432,6 +4432,8 @@ dependencies = [
 name = "slintcn-gallery"
 version = "0.0.0"
 dependencies = [
+ "i-slint-backend-testing",
+ "image",
  "slint",
  "slint-build",
 ]
