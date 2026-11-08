@@ -3,7 +3,7 @@ import { Checkbox } from "@slintcn/checkbox.slint";
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldLegendVariant, FieldOrientation, FieldSeparator, FieldSet, FieldTitle } from "@slintcn/field.slint";
 import { Input } from "@slintcn/input.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
-import { Switch } from "@slintcn/switch.slint";
+import { Switch, SwitchSize } from "@slintcn/switch.slint";
 
 export component FieldExamples inherits VerticalLayout {
     callback changed(string);
@@ -155,6 +155,73 @@ export component FieldExamples inherits VerticalLayout {
                 }
             }
 
+            Field {
+                orientation: FieldOrientation.horizontal;
+                accessible-label: airplane-label.text;
+
+                airplane := Switch {
+                    size: SwitchSize.sm;
+                    accessible-label: airplane-label.text;
+                    toggled(checked) => { root.changed(checked ? "Airplane mode on" : "Airplane mode off"); }
+                }
+                airplane-label := FieldLabel {
+                    text: "Airplane mode";
+                    clicked => {
+                        airplane.focus();
+                        airplane.accessible-action-default();
+                    }
+                }
+            }
+
+            location-field := Field {
+                orientation: FieldOrientation.horizontal;
+                cross-axis-alignment: start;
+                enabled: false;
+                accessible-label: location-label.text;
+
+                FieldContent {
+                    location-label := FieldLabel {
+                        text: "Location services";
+                        enabled: location-field.enabled;
+                    }
+                    location-description := FieldDescription {
+                        text: "Not available on this device.";
+                        enabled: location-field.enabled;
+                    }
+                }
+                Switch {
+                    enabled: location-field.enabled;
+                    accessible-label: location-label.text;
+                    accessible-description: location-description.text;
+                }
+            }
+
+            FieldSeparator { text: "Security"; }
+
+            two-factor-field := Field {
+                orientation: FieldOrientation.horizontal;
+                cross-axis-alignment: start;
+                invalid: true;
+                accessible-label: two-factor-label.text;
+
+                FieldContent {
+                    two-factor-label := FieldLabel {
+                        text: "Two-factor authentication";
+                        invalid: two-factor-field.invalid;
+                        clicked => {
+                            two-factor.focus();
+                            two-factor.accessible-action-default();
+                        }
+                    }
+                    two-factor-error := FieldError { text: "Required for admin accounts."; }
+                }
+                two-factor := Switch {
+                    invalid: two-factor-field.invalid;
+                    accessible-label: two-factor-label.text;
+                    accessible-description: two-factor-error.text;
+                }
+            }
+
             FieldSeparator { text: "Privacy"; }
 
             Field {
@@ -177,6 +244,54 @@ export component FieldExamples inherits VerticalLayout {
                     }
                     terms-description := FieldDescription {
                         text: "By clicking this checkbox, you agree to the terms and conditions.";
+                    }
+                }
+            }
+
+            privacy-field := Field {
+                orientation: FieldOrientation.horizontal;
+                cross-axis-alignment: start;
+                invalid: true;
+                accessible-label: privacy-label.text;
+
+                privacy := Checkbox {
+                    invalid: privacy-field.invalid;
+                    accessible-label: privacy-label.text;
+                    accessible-description: privacy-error.text;
+                }
+                FieldContent {
+                    privacy-label := FieldLabel {
+                        text: "I have read the privacy policy";
+                        invalid: privacy-field.invalid;
+                        clicked => {
+                            privacy.focus();
+                            privacy.accessible-action-default();
+                        }
+                    }
+                    privacy-error := FieldError { text: "You must accept the privacy policy to continue."; }
+                }
+            }
+
+            cookies-field := Field {
+                orientation: FieldOrientation.horizontal;
+                cross-axis-alignment: start;
+                enabled: false;
+                accessible-label: cookies-label.text;
+
+                Checkbox {
+                    checked: true;
+                    enabled: cookies-field.enabled;
+                    accessible-label: cookies-label.text;
+                    accessible-description: cookies-description.text;
+                }
+                FieldContent {
+                    cookies-label := FieldLabel {
+                        text: "Essential cookies";
+                        enabled: cookies-field.enabled;
+                    }
+                    cookies-description := FieldDescription {
+                        text: "Required for the app to work.";
+                        enabled: cookies-field.enabled;
                     }
                 }
             }
@@ -262,7 +377,7 @@ export component FieldExamples inherits VerticalLayout {
 export component FieldPreview inherits Window {
     in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
     in property <length> viewport-width: 560px;
-    in property <length> viewport-height: 1380px;
+    in property <length> viewport-height: 1780px;
 
     title: "slintcn fields";
     width: root.viewport-width;
