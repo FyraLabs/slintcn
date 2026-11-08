@@ -1,0 +1,127 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
+import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from "@slintcn/button-group.slint";
+import { Input } from "@slintcn/input.slint";
+import { GroupPosition, SlintcnPalette } from "@slintcn/styling.slint";
+
+export component ButtonGroupExamples inherits VerticalLayout {
+    callback clicked(string);
+    spacing: 24px;
+    alignment: start;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+
+        ButtonGroup {
+            accessible-label: "Mail actions";
+
+            Button { text: "Archive"; variant: ButtonVariant.outline; group-position: GroupPosition.first; clicked => { root.clicked("Archived"); } }
+            Button { text: "Report"; variant: ButtonVariant.outline; group-position: GroupPosition.last; clicked => { root.clicked("Reported"); } }
+        }
+
+        ButtonGroup {
+            accessible-label: "Snooze";
+
+            Button { text: "Snooze"; variant: ButtonVariant.outline; group-position: GroupPosition.first; }
+            Button { size: ButtonSize.icon; icon: @image-url("icons/chevron-down.svg"); accessible-label: "More snooze options"; variant: ButtonVariant.outline; group-position: GroupPosition.last; }
+        }
+    }
+
+    HorizontalLayout {
+        spacing: 16px;
+        alignment: start;
+        cross-axis-alignment: center;
+
+        ButtonGroup {
+            Button { text: "Small"; size: ButtonSize.sm; variant: ButtonVariant.outline; group-position: GroupPosition.first; }
+            Button { text: "Button"; size: ButtonSize.sm; variant: ButtonVariant.outline; group-position: GroupPosition.middle; }
+            Button { text: "Group"; size: ButtonSize.sm; variant: ButtonVariant.outline; group-position: GroupPosition.last; }
+        }
+
+        ButtonGroup {
+            Button { text: "Default"; variant: ButtonVariant.outline; group-position: GroupPosition.first; }
+            Button { text: "Disabled"; variant: ButtonVariant.outline; enabled: false; group-position: GroupPosition.middle; }
+            Button { size: ButtonSize.icon; icon: @image-url("icons/plus.svg"); accessible-label: "Add"; variant: ButtonVariant.outline; group-position: GroupPosition.last; }
+        }
+
+        ButtonGroup {
+            Button { text: "Large"; size: ButtonSize.lg; variant: ButtonVariant.outline; group-position: GroupPosition.first; }
+            Button { text: "Group"; size: ButtonSize.lg; variant: ButtonVariant.outline; group-position: GroupPosition.last; }
+        }
+    }
+
+    HorizontalLayout {
+        spacing: 16px;
+        alignment: start;
+        cross-axis-alignment: start;
+
+        ButtonGroup {
+            orientation: Orientation.vertical;
+            accessible-label: "Zoom";
+
+            Button { size: ButtonSize.icon; icon: @image-url("icons/plus.svg"); accessible-label: "Zoom in"; variant: ButtonVariant.outline; group-position: GroupPosition.first; group-orientation: Orientation.vertical; }
+            Button { size: ButtonSize.icon; icon: @image-url("icons/minus.svg"); accessible-label: "Zoom out"; variant: ButtonVariant.outline; group-position: GroupPosition.last; group-orientation: Orientation.vertical; }
+        }
+
+        ButtonGroup {
+            orientation: Orientation.vertical;
+
+            Button { text: "Top"; variant: ButtonVariant.outline; group-position: GroupPosition.first; group-orientation: Orientation.vertical; }
+            Button { text: "Middle"; variant: ButtonVariant.outline; group-position: GroupPosition.middle; group-orientation: Orientation.vertical; }
+            Button { text: "Bottom"; variant: ButtonVariant.outline; group-position: GroupPosition.last; group-orientation: Orientation.vertical; }
+        }
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 16px;
+                alignment: start;
+
+                ButtonGroup {
+                    Button { text: "Copy"; variant: ButtonVariant.secondary; group-position: GroupPosition.first; }
+                    ButtonGroupSeparator {}
+                    Button { text: "Paste"; variant: ButtonVariant.secondary; group-position: GroupPosition.last; }
+                }
+
+                ButtonGroup {
+                    Button { text: "Follow"; group-position: GroupPosition.first; }
+                    ButtonGroupSeparator {}
+                    Button { size: ButtonSize.icon; icon: @image-url("icons/plus.svg"); accessible-label: "Follow options"; group-position: GroupPosition.last; }
+                }
+            }
+
+            ButtonGroup {
+                horizontal-stretch: 1;
+
+                Input { placeholder-text: "Search..."; group-position: GroupPosition.first; }
+                Button { size: ButtonSize.icon; icon: @image-url("icons/search.svg"); accessible-label: "Search"; variant: ButtonVariant.outline; group-position: GroupPosition.last; }
+            }
+
+            ButtonGroup {
+                horizontal-stretch: 1;
+
+                ButtonGroupText { text: "https://"; group-position: GroupPosition.first; }
+                Input { placeholder-text: "example"; group-position: GroupPosition.middle; }
+                ButtonGroupText { text: ".com"; group-position: GroupPosition.last; }
+            }
+        }
+    }
+}
+
+export component ButtonGroupPreview inherits Window {
+    in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+
+    title: "slintcn button groups";
+    width: 720px;
+    height: 340px;
+    background: SlintcnPalette.background;
+
+    VerticalLayout {
+        padding: 32px;
+        ButtonGroupExamples {}
+    }
+}

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+import { GroupPosition, SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
 
 export enum ButtonVariant {
     default,
@@ -24,10 +24,22 @@ export component Button {
     in property <ButtonVariant> variant;
     in property <ButtonSize> size;
     in property <bool> enabled <=> i-touch-area.enabled;
+    in property <GroupPosition> group-position;
+    in property <Orientation> group-orientation;
     out property <bool> has-focus: i-focus-scope.has-focus;
     out property <bool> pressed: self.enabled && i-touch-area.pressed;
 
     callback clicked;
+
+    property <bool> joined-before: root.group-position == GroupPosition.middle || root.group-position == GroupPosition.last;
+    property <bool> joined-after: root.group-position == GroupPosition.first || root.group-position == GroupPosition.middle;
+    property <bool> group-vertical: root.group-orientation == Orientation.vertical;
+    property <length> join-x: root.joined-before && !root.group-vertical ? 1px : 0;
+    property <length> join-y: root.joined-before && root.group-vertical ? 1px : 0;
+    property <length> radius-top-left: root.joined-before ? 0 : SlintcnSizeSettings.radius-md;
+    property <length> radius-top-right: (root.group-vertical ? root.joined-before : root.joined-after) ? 0 : SlintcnSizeSettings.radius-md;
+    property <length> radius-bottom-left: (root.group-vertical ? root.joined-after : root.joined-before) ? 0 : SlintcnSizeSettings.radius-md;
+    property <length> radius-bottom-right: root.joined-after ? 0 : SlintcnSizeSettings.radius-md;
 
     property <bool> dark: SlintcnPalette.color-scheme == ColorScheme.dark;
     property <bool> hovered: i-touch-area.has-hover;
@@ -105,55 +117,74 @@ export component Button {
         y: -3px;
         width: root.width + 6px;
         height: root.height + 6px;
-        border-radius: SlintcnSizeSettings.radius-md + 3px;
+        border-top-left-radius: root.radius-top-left > 0 ? root.radius-top-left + 3px : 0;
+        border-top-right-radius: root.radius-top-right > 0 ? root.radius-top-right + 3px : 0;
+        border-bottom-left-radius: root.radius-bottom-left > 0 ? root.radius-bottom-left + 3px : 0;
+        border-bottom-right-radius: root.radius-bottom-right > 0 ? root.radius-bottom-right + 3px : 0;
         border-width: 3px;
         border-color: root.variant == ButtonVariant.destructive ? SlintcnPalette.destructive.transparentize(root.dark ? 0.6 : 0.8) : SlintcnPalette.ring.transparentize(0.5);
     }
 
-    i-background := Rectangle {
-        border-radius: SlintcnSizeSettings.radius-md;
-        border-width: root.variant == ButtonVariant.outline ? 1px : 0;
-        border-color: root.focus-visible ? SlintcnPalette.ring : root.dark ? SlintcnPalette.input : SlintcnPalette.border;
-        background: root.fill;
-        drop-shadow-offset-y: root.variant == ButtonVariant.outline ? 1px : 0;
-        drop-shadow-blur: root.variant == ButtonVariant.outline ? 2px : 0;
-        drop-shadow-color: #0000000d;
-        opacity: root.enabled ? 1 : 0.5;
+    // Clips the leading border away so grouped buttons share one divider.
+    i-clip := Rectangle {
+        x: root.join-x > 0 ? 0 : -4px;
+        y: root.join-y > 0 ? 0 : -4px;
+        width: root.width - self.x + 4px;
+        height: root.height - self.y + 4px;
+        clip: root.joined-before;
 
-        animate background, border-color { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+        i-background := Rectangle {
+            x: -i-clip.x - root.join-x;
+            y: -i-clip.y - root.join-y;
+            width: root.width + root.join-x;
+            height: root.height + root.join-y;
+            border-top-left-radius: root.radius-top-left;
+            border-top-right-radius: root.radius-top-right;
+            border-bottom-left-radius: root.radius-bottom-left;
+            border-bottom-right-radius: root.radius-bottom-right;
+            border-width: root.variant == ButtonVariant.outline ? 1px : 0;
+            border-color: root.focus-visible ? SlintcnPalette.ring : root.dark ? SlintcnPalette.input : SlintcnPalette.border;
+            background: root.fill;
+            drop-shadow-offset-y: root.variant == ButtonVariant.outline ? 1px : 0;
+            drop-shadow-blur: root.variant == ButtonVariant.outline ? 2px : 0;
+            drop-shadow-color: #0000000d;
+            opacity: root.enabled ? 1 : 0.5;
 
-        i-layout := HorizontalLayout {
-            padding-left: root.padding-x;
-            padding-right: root.padding-x;
-            spacing: root.has-icon && root.has-text ? (root.size == ButtonSize.sm ? 6px : 8px) : 0;
-            alignment: center;
+            animate background, border-color { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
 
-            if root.has-icon: Image {
-                source: root.icon;
-                width: 16px;
-                height: 16px;
-                y: (parent.height - self.height) / 2;
-                colorize: root.text-color;
-                accessible-role: none;
+            i-layout := HorizontalLayout {
+                padding-left: root.padding-x;
+                padding-right: root.padding-x;
+                spacing: root.has-icon && root.has-text ? (root.size == ButtonSize.sm ? 6px : 8px) : 0;
+                alignment: center;
+
+                if root.has-icon: Image {
+                    source: root.icon;
+                    width: 16px;
+                    height: 16px;
+                    y: (parent.height - self.height) / 2;
+                    colorize: root.text-color;
+                    accessible-role: none;
+                }
+
+                i-label := Text {
+                    text: root.text;
+                    color: root.text-color;
+                    font-size: 14px;
+                    font-weight: 500;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    accessible-role: none;
+                }
             }
 
-            i-label := Text {
-                text: root.text;
-                color: root.text-color;
-                font-size: 14px;
-                font-weight: 500;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-                accessible-role: none;
+            if root.variant == ButtonVariant.link && root.hovered && root.has-text: Rectangle {
+                x: i-layout.x + i-label.x;
+                y: i-layout.y + i-label.y + i-label.height / 2 + 9px;
+                width: i-label.width;
+                height: 1px;
+                background: root.text-color;
             }
-        }
-
-        if root.variant == ButtonVariant.link && root.hovered && root.has-text: Rectangle {
-            x: i-layout.x + i-label.x;
-            y: i-layout.y + i-label.y + i-label.height / 2 + 9px;
-            width: i-label.width;
-            height: 1px;
-            background: root.text-color;
         }
     }
 

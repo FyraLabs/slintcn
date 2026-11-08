@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
 import { FieldExamples } from "fields.slint";
+import { ButtonGroupExamples } from "button-groups.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -54,6 +55,10 @@ export component Gallery inherits Window {
                         SlintcnPalette.color-scheme = SlintcnPalette.color-scheme == ColorScheme.dark ? ColorScheme.light : ColorScheme.dark;
                     }
                 }
+            }
+
+            ButtonGroupExamples {
+                clicked(message) => { root.last-result = message; }
             }
 
             FieldExamples {

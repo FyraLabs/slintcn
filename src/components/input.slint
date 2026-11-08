@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+import { GroupPosition, SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
 import { Button, ButtonVariant } from "button.slint";
 export component Input {
     in-out property <string> text <=> i-text-input.text;
@@ -14,11 +14,19 @@ export component Input {
     };
     in-out property <bool> password-visible: false;
     in property <bool> invalid;
+    in property <GroupPosition> group-position;
+    in property <Orientation> group-orientation;
     out property <bool> has-focus: i-text-input.has-focus;
 
 
     callback edited(text: string);
     callback accepted(text: string);
+
+    property <bool> joined-before: root.group-position == GroupPosition.middle || root.group-position == GroupPosition.last;
+    property <bool> joined-after: root.group-position == GroupPosition.first || root.group-position == GroupPosition.middle;
+    property <bool> group-vertical: root.group-orientation == Orientation.vertical;
+    property <length> join-x: root.joined-before && !root.group-vertical ? 1px : 0;
+    property <length> join-y: root.joined-before && root.group-vertical ? 1px : 0;
 
     min-width: 80px;
     min-height: 36px;
@@ -29,11 +37,26 @@ export component Input {
     accessible-role: none;
 
     i-background := Rectangle {
-        border-radius: SlintcnSizeSettings.radius-md;
-        border-width: 1px;
-        border-color: SlintcnPalette.input;
+        border-top-left-radius: root.joined-before ? 0 : SlintcnSizeSettings.radius-md;
+        border-top-right-radius: (root.group-vertical ? root.joined-before : root.joined-after) ? 0 : SlintcnSizeSettings.radius-md;
+        border-bottom-left-radius: (root.group-vertical ? root.joined-after : root.joined-before) ? 0 : SlintcnSizeSettings.radius-md;
+        border-bottom-right-radius: root.joined-after ? 0 : SlintcnSizeSettings.radius-md;
         background: transparent;
         clip: true;
+
+        // Extends past the clip on the leading side so grouped controls share one divider.
+        i-border := Rectangle {
+            x: -root.join-x;
+            y: -root.join-y;
+            width: parent.width + root.join-x;
+            height: parent.height + root.join-y;
+            border-top-left-radius: i-background.border-top-left-radius;
+            border-top-right-radius: i-background.border-top-right-radius;
+            border-bottom-left-radius: i-background.border-bottom-left-radius;
+            border-bottom-right-radius: i-background.border-bottom-right-radius;
+            border-width: 1px;
+            border-color: SlintcnPalette.input;
+        }
 
         i-text-input := TextInput {
             x: 12px;

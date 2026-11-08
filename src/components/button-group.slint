@@ -1,0 +1,105 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { GroupPosition, SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export component ButtonGroup inherits FlexboxLayout {
+    in property <Orientation> orientation;
+
+    flex-direction: root.orientation == Orientation.vertical ? column : row;
+    flex-wrap: no-wrap;
+    alignment: start;
+    cross-axis-alignment: stretch;
+    spacing: 0;
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    accessible-role: groupbox;
+}
+
+export component ButtonGroupText {
+    in property <string> text;
+    in property <image> icon;
+    in property <GroupPosition> group-position;
+    in property <Orientation> group-orientation;
+
+    property <bool> has-icon: root.icon.width > 0 && root.icon.height > 0;
+    property <bool> joined-before: root.group-position == GroupPosition.middle || root.group-position == GroupPosition.last;
+    property <bool> joined-after: root.group-position == GroupPosition.first || root.group-position == GroupPosition.middle;
+    property <bool> group-vertical: root.group-orientation == Orientation.vertical;
+    property <length> join-x: root.joined-before && !root.group-vertical ? 1px : 0;
+    property <length> join-y: root.joined-before && root.group-vertical ? 1px : 0;
+
+    min-width: i-layout.min-width;
+    min-height: max(36px, i-layout.min-height);
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    accessible-role: AccessibleRole.text;
+    accessible-label: root.text;
+
+    // Clips the leading border away so grouped controls share one divider.
+    i-clip := Rectangle {
+        x: root.join-x > 0 ? 0 : -4px;
+        y: root.join-y > 0 ? 0 : -4px;
+        width: root.width - self.x + 4px;
+        height: root.height - self.y + 4px;
+        clip: root.joined-before;
+
+        i-background := Rectangle {
+            x: -i-clip.x - root.join-x;
+            y: -i-clip.y - root.join-y;
+            width: root.width + root.join-x;
+            height: root.height + root.join-y;
+            border-top-left-radius: root.joined-before ? 0 : SlintcnSizeSettings.radius-md;
+            border-top-right-radius: (root.group-vertical ? root.joined-before : root.joined-after) ? 0 : SlintcnSizeSettings.radius-md;
+            border-bottom-left-radius: (root.group-vertical ? root.joined-after : root.joined-before) ? 0 : SlintcnSizeSettings.radius-md;
+            border-bottom-right-radius: root.joined-after ? 0 : SlintcnSizeSettings.radius-md;
+            border-width: 1px;
+            border-color: SlintcnPalette.border;
+            background: SlintcnPalette.muted;
+            drop-shadow-offset-y: 1px;
+            drop-shadow-blur: 2px;
+            drop-shadow-color: #0000000d;
+
+            i-layout := HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                spacing: root.has-icon && root.text != "" ? 8px : 0;
+                alignment: center;
+
+                if root.has-icon: Image {
+                    source: root.icon;
+                    width: 16px;
+                    height: 16px;
+                    y: (parent.height - self.height) / 2;
+                    colorize: SlintcnPalette.foreground;
+                    accessible-role: none;
+                }
+
+                Text {
+                    text: root.text;
+                    color: SlintcnPalette.foreground;
+                    font-size: 14px;
+                    font-weight: 500;
+                    vertical-alignment: center;
+                    accessible-role: none;
+                }
+            }
+        }
+    }
+}
+
+export component ButtonGroupSeparator {
+    in property <Orientation> orientation: Orientation.vertical;
+
+    property <bool> vertical: root.orientation == Orientation.vertical;
+
+    min-width: 1px;
+    min-height: 1px;
+    preferred-width: 1px;
+    preferred-height: 1px;
+    horizontal-stretch: root.vertical ? 0 : 1;
+    vertical-stretch: root.vertical ? 1 : 0;
+    accessible-role: none;
+
+    Rectangle {
+        background: SlintcnPalette.input;
+    }
+}

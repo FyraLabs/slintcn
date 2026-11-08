@@ -114,6 +114,20 @@ export component App inherits Window {
 }
 ```
 
+## Button groups
+
+Slint components can't see their children, so a `ButtonGroup` can't restyle the buttons inside it. Tell each item where it sits with `group-position`. In a vertical group, also set `group-orientation`. `Button`, `Input` and `ButtonGroupText` take both properties.
+
+```slint
+ButtonGroup {
+    Button { text: "Archive"; variant: ButtonVariant.outline; group-position: GroupPosition.first; }
+    Button { text: "Snooze"; variant: ButtonVariant.outline; group-position: GroupPosition.middle; }
+    Button { text: "Report"; variant: ButtonVariant.outline; group-position: GroupPosition.last; }
+}
+```
+
+To nest groups, as shadcn does, put them in a layout with `spacing: 8px`.
+
 ## Updating
 
 There's no automatic upgrade. Compare your copy with the latest `src/components/` and merge the changes you want.
@@ -125,10 +139,11 @@ There's no automatic upgrade. Compare your copy with the latest `src/components/
 | `Alert`, `AlertVariant` | `@slintcn/alert.slint` | draft |
 | `AlertDialog` | `@slintcn/alert-dialog.slint` | draft |
 | `Button`, `ButtonVariant`, `ButtonSize` | `@slintcn/button.slint` | draft |
+| `ButtonGroup`, `ButtonGroupText`, `ButtonGroupSeparator` | `@slintcn/button-group.slint` | draft |
 | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` | `@slintcn/card.slint` | draft |
 | `Checkbox` | `@slintcn/checkbox.slint` | draft |
 | `Dialog`, `DialogFooter` | `@slintcn/dialog.slint` | draft |
-| `SlintcnPalette`, `SlintcnSizeSettings` (colors, dark/light, radii) | `@slintcn/styling.slint` | draft |
+| `SlintcnPalette`, `SlintcnSizeSettings` (colors, dark/light, radii), `GroupPosition` | `@slintcn/styling.slint` | draft |
 | `Field`, `FieldContent`, `FieldLabel`, `FieldTitle`, `FieldDescription`, `FieldError`, `FieldGroup`, `FieldSet`, `FieldLegend`, `FieldSeparator`, `FieldOrientation`, `FieldLegendVariant` | `@slintcn/field.slint` | draft |
 | `Input` | `@slintcn/input.slint` | draft |
 | `ScrollArea`, `ScrollBar` | `@slintcn/scroll-area.slint` | draft |
