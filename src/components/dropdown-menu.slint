@@ -239,6 +239,8 @@ export component DropdownMenuItem {
 
     callback activated();
 
+    min-width: i-base.min-width;
+    min-height: i-base.min-height;
     horizontal-stretch: 1;
     vertical-stretch: 0;
     accessible-role: list-item;
@@ -246,16 +248,16 @@ export component DropdownMenuItem {
     accessible-enabled: root.enabled;
     accessible-action-default => { i-base.activate(); }
 
-    HorizontalLayout {
-        i-base := MenuItemBase {
-            text: root.text;
-            icon: root.icon;
-            shortcut: root.shortcut;
-            enabled: root.enabled;
-            inset: root.inset;
-            destructive: root.variant == DropdownMenuItemVariant.destructive;
-            activated => { root.activated(); }
-        }
+    i-base := MenuItemBase {
+        width: 100%;
+        height: 100%;
+        text: root.text;
+        icon: root.icon;
+        shortcut: root.shortcut;
+        enabled: root.enabled;
+        inset: root.inset;
+        destructive: root.variant == DropdownMenuItemVariant.destructive;
+        activated => { root.activated(); }
     }
 }
 
@@ -267,6 +269,8 @@ export component DropdownMenuCheckboxItem {
 
     callback toggled(checked: bool);
 
+    min-width: i-base.min-width;
+    min-height: i-base.min-height;
     horizontal-stretch: 1;
     vertical-stretch: 0;
     accessible-role: checkbox;
@@ -276,27 +280,27 @@ export component DropdownMenuCheckboxItem {
     accessible-enabled: root.enabled;
     accessible-action-default => { i-base.activate(); }
 
-    HorizontalLayout {
-        i-base := MenuItemBase {
-            text: root.text;
-            shortcut: root.shortcut;
-            enabled: root.enabled;
-            inset: true;
-            activated => {
-                root.checked = !root.checked;
-                root.toggled(root.checked);
-            }
+    i-base := MenuItemBase {
+        width: 100%;
+        height: 100%;
+        text: root.text;
+        shortcut: root.shortcut;
+        enabled: root.enabled;
+        inset: true;
+        activated => {
+            root.checked = !root.checked;
+            root.toggled(root.checked);
+        }
 
-            if root.checked: Image {
-                x: 8px;
-                y: (parent.height - self.height) / 2;
-                width: 16px;
-                height: 16px;
-                source: @image-url("_check.svg");
-                colorize: SlintcnPalette.popover-foreground;
-                opacity: root.enabled ? 1 : 0.5;
-                accessible-role: none;
-            }
+        if root.checked: Image {
+            x: 8px;
+            y: (parent.height - self.height) / 2;
+            width: 16px;
+            height: 16px;
+            source: @image-url("_check.svg");
+            colorize: SlintcnPalette.popover-foreground;
+            opacity: root.enabled ? 1 : 0.5;
+            accessible-role: none;
         }
     }
 }
@@ -309,6 +313,8 @@ export component DropdownMenuRadioItem {
 
     callback activated();
 
+    min-width: i-base.min-width;
+    min-height: i-base.min-height;
     horizontal-stretch: 1;
     vertical-stretch: 0;
     accessible-role: radio-button;
@@ -318,23 +324,23 @@ export component DropdownMenuRadioItem {
     accessible-enabled: root.enabled;
     accessible-action-default => { i-base.activate(); }
 
-    HorizontalLayout {
-        i-base := MenuItemBase {
-            text: root.text;
-            shortcut: root.shortcut;
-            enabled: root.enabled;
-            inset: true;
-            activated => { root.activated(); }
+    i-base := MenuItemBase {
+        width: 100%;
+        height: 100%;
+        text: root.text;
+        shortcut: root.shortcut;
+        enabled: root.enabled;
+        inset: true;
+        activated => { root.activated(); }
 
-            if root.checked: Rectangle {
-                x: 12px;
-                y: (parent.height - self.height) / 2;
-                width: 8px;
-                height: 8px;
-                border-radius: 4px;
-                background: SlintcnPalette.popover-foreground;
-                opacity: root.enabled ? 1 : 0.5;
-            }
+        if root.checked: Rectangle {
+            x: 12px;
+            y: (parent.height - self.height) / 2;
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            background: SlintcnPalette.popover-foreground;
+            opacity: root.enabled ? 1 : 0.5;
         }
     }
 }

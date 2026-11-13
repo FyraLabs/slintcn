@@ -18,7 +18,6 @@ export component Input {
     in property <Orientation> group-orientation;
     out property <bool> has-focus: i-text-input.has-focus;
 
-
     callback edited(text: string);
     callback accepted(text: string);
 
@@ -41,7 +40,6 @@ export component Input {
         border-top-right-radius: (root.group-vertical ? root.joined-before : root.joined-after) ? 0 : SlintcnSizeSettings.radius-md;
         border-bottom-left-radius: (root.group-vertical ? root.joined-after : root.joined-before) ? 0 : SlintcnSizeSettings.radius-md;
         border-bottom-right-radius: root.joined-after ? 0 : SlintcnSizeSettings.radius-md;
-        background: transparent;
         clip: true;
 
         // Extends past the clip on the leading side so grouped controls share one divider.
