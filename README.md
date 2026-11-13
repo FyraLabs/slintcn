@@ -120,20 +120,7 @@ There's no automatic upgrade. Compare your copy with the latest `src/components/
 
 ## Components
 
-| Component | Import | Status |
-|---|---|---|
-| `Alert`, `AlertVariant` | `@slintcn/alert.slint` | draft |
-| `AlertDialog` | `@slintcn/alert-dialog.slint` | draft |
-| `Button`, `ButtonVariant`, `ButtonSize` | `@slintcn/button.slint` | draft |
-| `ButtonGroup`, `ButtonGroupText`, `ButtonGroupSeparator` | `@slintcn/button-group.slint` | draft |
-| `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` | `@slintcn/card.slint` | draft |
-| `Checkbox` | `@slintcn/checkbox.slint` | draft |
-| `Dialog`, `DialogFooter` | `@slintcn/dialog.slint` | draft |
-| `SlintcnPalette`, `SlintcnSizeSettings` (colors, dark/light, radii), `GroupPosition` | `@slintcn/styling.slint` | draft |
-| `Field`, `FieldContent`, `FieldLabel`, `FieldTitle`, `FieldDescription`, `FieldError`, `FieldGroup`, `FieldSet`, `FieldLegend`, `FieldSeparator`, `FieldOrientation`, `FieldLegendVariant` | `@slintcn/field.slint` | draft |
-| `Input` | `@slintcn/input.slint` | draft |
-| `ScrollArea`, `ScrollBar` | `@slintcn/scroll-area.slint` | draft |
-| `Switch`, `SwitchSize` | `@slintcn/switch.slint` | draft |
+See the [component documentation](docs/components/) for all components and usage examples.
 
 ## Developing slintcn
 
