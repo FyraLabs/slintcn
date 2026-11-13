@@ -25,7 +25,7 @@ fn disabled_button_ignores_clicks() {
 
 #[test]
 fn switch_toggles_on_click() {
-    let gallery = gallery();
+    let gallery = gallery_section("fields");
     let switch = find_role(&gallery, AccessibleRole::Switch, "Airplane mode");
     assert_eq!(switch.accessible_checked(), Some(false));
     click(&switch);
@@ -35,7 +35,7 @@ fn switch_toggles_on_click() {
 
 #[test]
 fn disabled_switch_stays_off() {
-    let gallery = gallery();
+    let gallery = gallery_section("fields");
     let switch = find_role(&gallery, AccessibleRole::Switch, "Location services");
     assert_eq!(switch.accessible_enabled(), Some(false));
     click(&switch);
@@ -44,8 +44,12 @@ fn disabled_switch_stays_off() {
 
 #[test]
 fn checkbox_toggles_through_its_accessible_action() {
-    let gallery = gallery();
-    let checkbox = find_role(&gallery, AccessibleRole::Checkbox, "Accept terms and conditions");
+    let gallery = gallery_section("fields");
+    let checkbox = find_role(
+        &gallery,
+        AccessibleRole::Checkbox,
+        "Accept terms and conditions",
+    );
     checkbox.invoke_accessible_default_action();
     settle();
     assert_eq!(checkbox.accessible_checked(), Some(true));
@@ -54,7 +58,7 @@ fn checkbox_toggles_through_its_accessible_action() {
 
 #[test]
 fn dialog_closes_on_escape() {
-    let gallery = gallery();
+    let gallery = gallery_section("alerts");
     click(&find(&gallery, "Open dialog"));
     assert!(exists(&gallery, "Save changes"), "dialog did not open");
     press_key(gallery.window(), Key::Escape);
@@ -64,11 +68,9 @@ fn dialog_closes_on_escape() {
 
 #[test]
 fn alert_dialog_cancel_runs_its_callback() {
-    let gallery = gallery();
-    let card_cancel = find(&gallery, "Cancel").absolute_position();
+    let gallery = gallery_section("alerts");
     click(&find(&gallery, "Delete account"));
-    let cancel: Vec<_> = find_all(&gallery, "Cancel").into_iter().filter(|e| e.absolute_position() != card_cancel).collect();
-    assert_eq!(cancel.len(), 1, "alert dialog did not open");
-    click(&cancel[0]);
+    let cancel = find(&gallery, "Cancel");
+    click(&cancel);
     assert_eq!(gallery.get_last_result(), "Delete cancelled");
 }

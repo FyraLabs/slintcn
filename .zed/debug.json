@@ -38,5 +38,19 @@
     },
     "program": "$ZED_WORKTREE_ROOT/target/debug/slintcn-gallery",
     "sourceLanguages": ["rust"]
-  }
+  },
+  {
+    "label": "Debug gallery (Qt backend)",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": {
+      "command": "cargo",
+      "env": {
+        "SLINT_STYLE": "qt"
+      },
+      "args": ["build", "-p", "slintcn-gallery", "--features", "slint/backend-qt"]
+    },
+    "program": "$ZED_WORKTREE_ROOT/target/debug/slintcn-gallery",
+    "sourceLanguages": ["rust"]
+  },
 ]

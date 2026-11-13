@@ -5,6 +5,7 @@ use slint::language::ColorScheme;
 use slint::{ComponentHandle, LogicalSize};
 use slintcn_gallery::{
     ButtonGroupPreview, CardPreview, FieldPreview, ItemPreview, LabelPreview, MenuPreview,
+    TabsPreview,
 };
 
 const SCHEMES: [(ColorScheme, &str); 2] =
@@ -13,6 +14,7 @@ const SCHEMES: [(ColorScheme, &str); 2] =
 #[test]
 fn gallery() {
     let gallery = common::gallery();
+    gallery.window().set_size(LogicalSize::new(960., 720.));
     for (scheme, name) in SCHEMES {
         gallery.set_color_scheme(scheme);
         assert_screenshot(gallery.window(), &format!("gallery-{name}"));
@@ -61,6 +63,27 @@ fn items() {
         preview.set_color_scheme(scheme);
         assert_screenshot(preview.window(), &format!("items-{name}"));
     }
+}
+
+#[test]
+fn tabs() {
+    init();
+    let preview = TabsPreview::new().unwrap();
+    preview.show().unwrap();
+    for (scheme, name) in SCHEMES {
+        preview.set_color_scheme(scheme);
+        assert_screenshot(preview.window(), &format!("tabs-{name}"));
+    }
+}
+
+#[test]
+fn keyboard_focus_on_tabs() {
+    init();
+    let preview = TabsPreview::new().unwrap();
+    preview.show().unwrap();
+    click(&find_role(&preview, AccessibleRole::Tab, "Account"));
+    press_key(preview.window(), slint::platform::Key::RightArrow);
+    assert_screenshot(preview.window(), "tabs-keyboard");
 }
 
 #[test]

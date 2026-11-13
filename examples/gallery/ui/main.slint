@@ -3,6 +3,7 @@ import { Alert, AlertVariant } from "@slintcn/alert.slint";
 import { AlertDialog } from "@slintcn/alert-dialog.slint";
 import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
 import { Dialog, DialogFooter } from "@slintcn/dialog.slint";
+import { Tabs, TabsContent, TabsList } from "@slintcn/tabs.slint";
 import { SlintcnPalette } from "@slintcn/styling.slint";
 import { FieldExamples } from "fields.slint";
 import { ButtonGroupExamples } from "button-groups.slint";
@@ -10,6 +11,7 @@ import { CardExamples } from "cards.slint";
 import { MenuExamples } from "menus.slint";
 import { LabelExamples } from "labels.slint";
 import { ItemExamples } from "items.slint";
+import { TabsExamples } from "tabs.slint";
 
 export { ButtonGroupPreview } from "button-groups.slint";
 export { CardPreview } from "cards.slint";
@@ -17,6 +19,7 @@ export { FieldPreview } from "fields.slint";
 export { MenuPreview } from "menus.slint";
 export { LabelPreview } from "labels.slint";
 export { ItemPreview } from "items.slint";
+export { TabsPreview } from "tabs.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -25,6 +28,7 @@ export component Gallery inherits Window {
     background: SlintcnPalette.background;
 
     in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+    in-out property <string> selected-section: "buttons";
     out property <string> last-result;
 
     gallery-scroll := ScrollArea {
@@ -33,114 +37,173 @@ export component Gallery inherits Window {
 
         gallery-content := VerticalLayout {
             padding: 32px;
-            spacing: 32px;
             alignment: start;
 
-            HorizontalLayout {
-                spacing: 8px;
-                alignment: start;
+            Tabs {
+                TabsList {
+                    tabs: [
+                        { text:"Buttons", value:"buttons" },
+                        { text:"Fields", value:"fields" },
+                        { text:"Cards", value:"cards" },
+                        { text:"Menus", value:"menus" },
+                        { text:"Labels", value:"labels" },
+                        { text:"Items", value:"items" },
+                        { text:"Alerts", value:"alerts" },
+                        { text:"Tabs", value:"tabs" },
+                    ];
+                    selected-value: root.selected-section;
+                    changed(value) => {
+                        root.selected-section = value;
+                        gallery-scroll.content-y = 0;
+                    }
+                    navigation-group: "gallery-sections";
+                }
 
-                Button { text: "Default"; }
-                Button { text: "Secondary"; variant: ButtonVariant.secondary; }
-                Button { text: "Destructive"; variant: ButtonVariant.destructive; }
-                Button { text: "Outline"; variant: ButtonVariant.outline; }
-                Button { text: "Ghost"; variant: ButtonVariant.ghost; }
-                Button { text: "Link"; variant: ButtonVariant.link; }
-            }
+                if root.selected-section == "buttons": TabsContent {
+                    value: "buttons";
+                    selected-value: root.selected-section;
+                    spacing: 32px;
 
-            HorizontalLayout {
-                spacing: 8px;
-                alignment: start;
-                cross-axis-alignment: center;
+                    HorizontalLayout {
+                        spacing: 8px;
+                        alignment: start;
 
-                Button { text: "Small"; size: ButtonSize.sm; variant: ButtonVariant.outline; }
-                Button { text: "Default"; variant: ButtonVariant.outline; }
-                Button { text: "Large"; size: ButtonSize.lg; variant: ButtonVariant.outline; }
-                Button { size: ButtonSize.icon; icon: @image-url("icons/plus.svg"); variant: ButtonVariant.outline; }
-                Button { text: "Add"; icon: @image-url("icons/plus.svg"); }
-                Button { text: "Disabled"; enabled: false; }
-                Button {
-                    text: SlintcnPalette.color-scheme == ColorScheme.dark ? "Light mode" : "Dark mode";
-                    variant: ButtonVariant.outline;
-                    clicked => {
-                        SlintcnPalette.color-scheme = SlintcnPalette.color-scheme == ColorScheme.dark ? ColorScheme.light : ColorScheme.dark;
+                        Button { text: "Default"; }
+                        Button { text: "Secondary"; variant: ButtonVariant.secondary; }
+                        Button { text: "Destructive"; variant: ButtonVariant.destructive; }
+                        Button { text: "Outline"; variant: ButtonVariant.outline; }
+                        Button { text: "Ghost"; variant: ButtonVariant.ghost; }
+                        Button { text: "Link"; variant: ButtonVariant.link; }
+                    }
+
+                    HorizontalLayout {
+                        spacing: 8px;
+                        alignment: start;
+                        cross-axis-alignment: center;
+
+                        Button { text: "Small"; size: ButtonSize.sm; variant: ButtonVariant.outline; }
+                        Button { text: "Default"; variant: ButtonVariant.outline; }
+                        Button { text: "Large"; size: ButtonSize.lg; variant: ButtonVariant.outline; }
+                        Button { size: ButtonSize.icon; icon: @image-url("icons/plus.svg"); variant: ButtonVariant.outline; }
+                        Button { text: "Add"; icon: @image-url("icons/plus.svg"); }
+                        Button { text: "Disabled"; enabled: false; }
+                        Button {
+                            text: SlintcnPalette.color-scheme == ColorScheme.dark ? "Light mode" : "Dark mode";
+                            variant: ButtonVariant.outline;
+                            clicked => {
+                                SlintcnPalette.color-scheme = SlintcnPalette.color-scheme == ColorScheme.dark ? ColorScheme.light : ColorScheme.dark;
+                            }
+                        }
+                    }
+
+                    ButtonGroupExamples {
+                        clicked(message) => { root.last-result = message; }
                     }
                 }
-            }
 
-            ButtonGroupExamples {
-                clicked(message) => { root.last-result = message; }
-            }
+                if root.selected-section == "fields": TabsContent {
+                    value: "fields";
+                    selected-value: root.selected-section;
+                    spacing: 32px;
 
-            MenuExamples {
-                clicked(message) => { root.last-result = message; }
-            }
-
-            FieldExamples {
-                width: 480px;
-                changed(message) => { root.last-result = message; }
-            }
-
-            CardExamples {
-                clicked(message) => { root.last-result = message; }
-            }
-
-            VerticalLayout {
-                width: 480px;
-                spacing: 16px;
-
-                Alert {
-                    icon: @image-url("icons/circle-check.svg");
-                    title: "Success! Your changes have been saved";
-                    description: "This is an alert with icon, title and description.";
+                    FieldExamples {
+                        width: 480px;
+                        changed(message) => { root.last-result = message; }
+                    }
                 }
 
-                Alert {
-                    variant: AlertVariant.destructive;
-                    icon: @image-url("icons/circle-alert.svg");
-                    title: "Unable to process your payment.";
-                    description: "Please verify your billing information and try again.";
+                if root.selected-section == "cards": TabsContent {
+                    value: "cards";
+                    selected-value: root.selected-section;
+                    CardExamples {
+                        clicked(message) => { root.last-result = message; }
+                    }
                 }
 
-                Alert {
-                    title: "No icon or description";
+                if root.selected-section == "menus": TabsContent {
+                    value: "menus";
+                    selected-value: root.selected-section;
+                    MenuExamples {
+                        clicked(message) => { root.last-result = message; }
+                    }
+                }
+
+                if root.selected-section == "labels": TabsContent {
+                    value: "labels";
+                    selected-value: root.selected-section;
+                    LabelExamples {
+                        changed(message) => { root.last-result = message; }
+                    }
+                }
+
+                if root.selected-section == "items": TabsContent {
+                    value: "items";
+                    selected-value: root.selected-section;
+                    ItemExamples {
+                        clicked(message) => { root.last-result = message; }
+                    }
+                }
+
+                if root.selected-section == "alerts": TabsContent {
+                    value: "alerts";
+                    selected-value: root.selected-section;
+                    spacing: 32px;
+
+                    VerticalLayout {
+                        width: 480px;
+                        spacing: 16px;
+
+                        Alert {
+                            icon: @image-url("icons/circle-check.svg");
+                            title: "Success! Your changes have been saved";
+                            description: "This is an alert with icon, title and description.";
+                        }
+
+                        Alert {
+                            variant: AlertVariant.destructive;
+                            icon: @image-url("icons/circle-alert.svg");
+                            title: "Unable to process your payment.";
+                            description: "Please verify your billing information and try again.";
+                        }
+
+                        Alert { title: "No icon or description"; }
+                    }
+
+                    HorizontalLayout {
+                        spacing: 8px;
+                        alignment: start;
+
+                        Button {
+                            text: "Open dialog";
+                            variant: ButtonVariant.outline;
+                            clicked => { edit-dialog.show(); }
+                        }
+
+                        Button {
+                            text: "Delete account";
+                            variant: ButtonVariant.destructive;
+                            clicked => { delete-dialog.show(); }
+                        }
+
+                        Text {
+                            text: root.last-result;
+                            color: SlintcnPalette.muted-foreground;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+
+                if root.selected-section == "tabs": TabsContent {
+                    value: "tabs";
+                    selected-value: root.selected-section;
+                    TabsExamples {}
                 }
             }
 
-            HorizontalLayout {
-                spacing: 8px;
-                alignment: start;
-
-                open-dialog := Button {
-                    text: "Open dialog";
-                    variant: ButtonVariant.outline;
-                    clicked => { edit-dialog.show(); }
-                }
-
-                open-alert-dialog := Button {
-                    text: "Delete account";
-                    variant: ButtonVariant.destructive;
-                    clicked => { delete-dialog.show(); }
-                }
-
-                result := Text {
-                    text: root.last-result;
-                    color: SlintcnPalette.muted-foreground;
-                    vertical-alignment: center;
-                }
-            }
-
-            LabelExamples {
-                changed(message) => { root.last-result = message; }
-            }
-
-            ItemExamples {
-                clicked(message) => { root.last-result = message; }
-            }
         }
     }
 
-    Alert {
+    if root.selected-section == "alerts": Alert {
         x: parent.width - self.width - 16px;
         y: parent.height - self.height - 16px;
         width: 360px;
@@ -169,7 +232,7 @@ export component Gallery inherits Window {
                 }
             }
 
-            save-button := Button {
+            Button {
                 text: "Save changes";
                 clicked => {
                     edit-dialog.close();

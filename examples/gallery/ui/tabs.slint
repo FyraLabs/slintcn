@@ -1,0 +1,133 @@
+import { Card, CardContent } from "@slintcn/card.slint";
+import { Tabs, TabsList, TabsContent, TabsListVariant } from "@slintcn/tabs.slint";
+import { SlintcnPalette } from "@slintcn/styling.slint";
+
+component TabsDemoCard {
+    in property <string> selected-value;
+    in property <Orientation> orientation;
+
+    Card {
+        CardContent {
+            TabsContent {
+                value: root.selected-value;
+                selected-value: root.selected-value;
+
+                if root.selected-value == "account": Text {
+                    text: "Manage your account preferences and profile information.";
+                    color: SlintcnPalette.card-foreground;
+                    wrap: word-wrap;
+                }
+                if root.selected-value == "password": Text {
+                    text: "Update your password to keep your account secure.";
+                    color: SlintcnPalette.card-foreground;
+                    wrap: word-wrap;
+                }
+                if root.selected-value == "disabled": Text {
+                    text: "This panel is disabled.";
+                    color: SlintcnPalette.card-foreground;
+                }
+            }
+        }
+    }
+}
+
+export component TabsExamples {
+    in-out property <string> account: "account";
+    in-out property <string> line: "account";
+    in-out property <string> vertical: "account";
+    in-out property <string> icons: "account";
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    VerticalLayout {
+        spacing: 24px;
+        alignment: start;
+
+        Tabs {
+            TabsList {
+                selected-value: root.account;
+                changed(value) => { root.account = value; }
+                navigation-group: "tabs-demo-default";
+                tabs: [
+                    { text:"Account", value:"account" },
+                    { text:"Password", value:"password" },
+                    { text:"Disabled", value:"disabled", disabled:true },
+                ];
+            }
+
+            TabsDemoCard { selected-value: root.account; }
+        }
+
+        Tabs {
+            TabsList {
+                selected-value: root.line;
+                changed(value) => { root.line = value; }
+                navigation-group: "tabs-demo-line";
+                variant: TabsListVariant.line;
+                tabs: [
+                    { text:"Line account", value:"account" },
+                    { text:"Line password", value:"password" },
+                    { text:"Line disabled", value:"disabled", disabled:true },
+                ];
+            }
+
+            TabsDemoCard { selected-value: root.line; }
+        }
+
+        Tabs {
+            orientation: Orientation.vertical;
+
+            TabsList {
+                selected-value: root.vertical;
+                changed(value) => { root.vertical = value; }
+                orientation: Orientation.vertical;
+                navigation-group: "tabs-demo-vertical";
+                tabs: [
+                    { text:"Vertical account", value:"account" },
+                    { text:"Vertical password", value:"password" },
+                    { text:"Vertical disabled", value:"disabled", disabled:true },
+                ];
+            }
+
+            TabsDemoCard { selected-value: root.vertical; }
+        }
+
+        Tabs {
+            TabsList {
+                selected-value: root.icons;
+                changed(value) => { root.icons = value; }
+                activate-on-focus: true;
+                navigation-group: "tabs-demo-icons";
+                tabs: [
+                    { text:"Icon account", value:"account", icon:@image-url("../../../src/components/_check.svg") },
+                    { text:"Icon password", value:"password", icon:@image-url("../../../src/components/_check.svg") },
+                ];
+            }
+
+            Text {
+                text: "Selected panel: " + root.icons;
+                color: SlintcnPalette.foreground;
+                font-size: 14px;
+            }
+        }
+    }
+}
+
+export component TabsPreview inherits Window {
+    preferred-width: 620px;
+    preferred-height: 560px;
+    background: SlintcnPalette.background;
+
+    in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+    in-out property <string> account <=> examples.account;
+    in-out property <string> line <=> examples.line;
+    in-out property <string> vertical <=> examples.vertical;
+    in-out property <string> icons <=> examples.icons;
+
+    VerticalLayout {
+        padding: 24px;
+        alignment: start;
+        examples := TabsExamples {}
+    }
+}

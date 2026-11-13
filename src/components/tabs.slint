@@ -1,0 +1,302 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export enum TabsListVariant {
+    default,
+    line,
+}
+
+export struct TabEntry {
+    text: string,
+    value: string,
+    disabled: bool,
+    icon: image,
+}
+
+// Parts use this brief shared request because Slint has no parent context.
+global TabsNavigation {
+    in-out property <string> group;
+    in-out property <string> value;
+    in-out property <string> source;
+    in-out property <int> step;
+    in-out property <int> sequence;
+
+    public function focus(group: string, value: string, source: string, step: int) {
+        self.group = group;
+        self.value = value;
+        self.source = source;
+        self.step = step;
+        self.sequence += 1;
+    }
+}
+
+export component Tabs {
+    in property <Orientation> orientation;
+
+    min-width: i-layout.min-width;
+    min-height: i-layout.min-height;
+    preferred-width: i-layout.preferred-width;
+    preferred-height: i-layout.preferred-height;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    i-layout := FlexboxLayout {
+        flex-direction: root.orientation == Orientation.horizontal ? FlexboxLayoutDirection.column : FlexboxLayoutDirection.row;
+        flex-wrap: FlexboxLayoutWrap.no-wrap;
+        alignment: stretch;
+        spacing: 8px;
+        cross-axis-alignment: root.orientation == Orientation.horizontal ? start : stretch;
+
+        @children
+    }
+}
+
+export component TabsTrigger {
+    in property <string> text;
+    in property <string> value;
+    in property <string> selected-value;
+    in property <TabsListVariant> variant;
+    in property <Orientation> orientation;
+    in property <bool> enabled: true;
+    in property <bool> activate-on-focus: false;
+    in property <string> navigation-group;
+    in property <string> next-value;
+    in property <string> previous-value;
+    in property <string> first-value;
+    in property <string> last-value;
+    in property <image> icon;
+    out property <bool> has-focus: i-focus-scope.has-focus;
+    out property <bool> active: root.value == root.selected-value;
+
+    callback activated(value: string);
+
+    private property <bool> has-icon: root.icon.width > 0 && root.icon.height > 0;
+    private property <bool> hovered: i-touch-area.has-hover;
+    private property <bool> keyboard-focus;
+    private property <bool> focus-visible: root.has-focus && root.keyboard-focus;
+    private property <bool> dark: SlintcnPalette.color-scheme == ColorScheme.dark;
+    private property <int> navigation-sequence: TabsNavigation.sequence;
+    private property <color> foreground: root.active || root.hovered ? SlintcnPalette.foreground : SlintcnPalette.muted-foreground;
+
+    min-height: 25px;
+    forward-focus: i-focus-scope;
+    horizontal-stretch: root.orientation == Orientation.vertical ? 1 : 0;
+    vertical-stretch: 0;
+
+    accessible-role: tab;
+    accessible-label: root.text;
+    accessible-enabled: root.enabled;
+    accessible-item-selected: root.active;
+    accessible-item-selectable: true;
+    accessible-action-default => { root.activate(true); }
+
+    function activate(focus: bool) {
+        if root.enabled {
+            if focus {
+                keyboard-focus = false;
+                i-focus-scope.focus();
+            }
+            root.activated(root.value);
+        }
+    }
+
+    function navigate(value: string, step: int) {
+        if value != "" && root.navigation-group != "" {
+            TabsNavigation.focus(root.navigation-group, value, root.value, step);
+        }
+    }
+
+    changed navigation-sequence => {
+        if TabsNavigation.group == root.navigation-group && TabsNavigation.value == root.value {
+            if root.enabled {
+                i-focus-scope.focus();
+                keyboard-focus = true;
+                if root.activate-on-focus {
+                    root.activate(false);
+                }
+            } else if root.value != TabsNavigation.source {
+                navigate(TabsNavigation.step == 1 ? root.next-value : root.previous-value, TabsNavigation.step);
+            }
+        }
+    }
+
+    if root.focus-visible: Rectangle {
+        x: -3px;
+        y: -3px;
+        width: parent.width + 6px;
+        height: parent.height + 6px;
+        border-radius: SlintcnSizeSettings.radius-md + 3px;
+        border-width: 3px;
+        border-color: SlintcnPalette.ring.transparentize(0.5);
+    }
+
+    i-background := Rectangle {
+        border-radius: SlintcnSizeSettings.radius-md;
+        border-width: 1px;
+        border-color: root.focus-visible ? SlintcnPalette.ring : root.dark && root.active && root.variant == TabsListVariant.default ? SlintcnPalette.input : transparent;
+        background: root.active && root.variant == TabsListVariant.default ? root.dark ? SlintcnPalette.input.transparentize(0.7) : SlintcnPalette.background : transparent;
+        drop-shadow-offset-y: root.active && root.variant == TabsListVariant.default ? 1px : 0;
+        drop-shadow-blur: root.active && root.variant == TabsListVariant.default ? 2px : 0;
+        drop-shadow-color: #0000000d;
+        opacity: root.enabled ? 1 : 0.5;
+
+        animate background, border-color { duration: 150ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+
+        i-layout := HorizontalLayout {
+            alignment: root.orientation == Orientation.vertical ? start : center;
+            spacing: root.has-icon ? 6px : 0;
+            padding-left: 6px;
+            padding-right: 6px;
+            padding-top: 2px;
+            padding-bottom: 2px;
+
+            if root.has-icon: Image {
+                source: root.icon;
+                width: 16px;
+                height: 16px;
+                colorize: root.foreground;
+                accessible-role: none;
+            }
+
+            i-text := Text {
+                text: root.text;
+                color: root.foreground;
+                font-size: 14px;
+                font-weight: 500;
+                accessible-role: none;
+            }
+
+            @children
+        }
+    }
+
+    if root.active && root.variant == TabsListVariant.line: Rectangle {
+        x: root.orientation == Orientation.horizontal ? 0 : parent.width + 4px;
+        y: root.orientation == Orientation.horizontal ? parent.height + 5px : 0;
+        width: root.orientation == Orientation.horizontal ? parent.width : 2px;
+        height: root.orientation == Orientation.horizontal ? 2px : parent.height;
+        background: SlintcnPalette.foreground;
+    }
+
+    i-touch-area := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+        clicked => { root.activate(true); }
+    }
+
+    i-focus-scope := FocusScope {
+        x: 0;
+        width: 0;
+        enabled: root.enabled;
+        focus-on-tab-navigation: root.active;
+
+        focus-gained(reason) => {
+            if reason != FocusReason.window-activation {
+                root.keyboard-focus = reason == FocusReason.tab-navigation;
+            }
+        }
+
+        changed has-focus => {
+            if self.has-focus && root.activate-on-focus {
+                root.activate(false);
+            }
+        }
+
+        key-pressed(event) => {
+            if event.text == Key.Space || event.text == Key.Return {
+                root.activate(false);
+                return accept;
+            }
+            if (root.orientation == Orientation.horizontal && event.text == Key.RightArrow)
+                || (root.orientation == Orientation.vertical && event.text == Key.DownArrow) {
+                root.navigate(root.next-value, 1);
+                return accept;
+            }
+            if (root.orientation == Orientation.horizontal && event.text == Key.LeftArrow)
+                || (root.orientation == Orientation.vertical && event.text == Key.UpArrow) {
+                root.navigate(root.previous-value, -1);
+                return accept;
+            }
+            if event.text == Key.Home {
+                root.navigate(root.first-value, 1);
+                return accept;
+            }
+            if event.text == Key.End {
+                root.navigate(root.last-value, -1);
+                return accept;
+            }
+            return reject;
+        }
+    }
+}
+
+export component TabsList {
+    in property <[TabEntry]> tabs;
+    in property <string> selected-value;
+    in property <TabsListVariant> variant;
+    in property <Orientation> orientation;
+    in property <bool> activate-on-focus: false;
+    in property <string> navigation-group;
+
+    min-width: i-layout.min-width;
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    callback changed(value: string);
+
+    accessible-role: tab-list;
+
+    i-background := Rectangle {
+        background: root.variant == TabsListVariant.default ? SlintcnPalette.muted : transparent;
+        border-radius: root.variant == TabsListVariant.default ? SlintcnSizeSettings.radius-lg : 0;
+
+        i-layout := FlexboxLayout {
+            flex-direction: root.orientation == Orientation.horizontal ? FlexboxLayoutDirection.row : FlexboxLayoutDirection.column;
+            flex-wrap: FlexboxLayoutWrap.no-wrap;
+            alignment: stretch;
+            spacing-horizontal: root.variant == TabsListVariant.line ? 4px : 0;
+            spacing-vertical: root.variant == TabsListVariant.line ? 4px : 0;
+            padding: 3px;
+
+            for tab[i] in root.tabs: TabsTrigger {
+                text: tab.text;
+                value: tab.value;
+                enabled: !tab.disabled;
+                icon: tab.icon;
+                selected-value: root.selected-value;
+                activated(value) => {
+                    root.changed(value);
+                }
+                variant: root.variant;
+                orientation: root.orientation;
+                activate-on-focus: root.activate-on-focus;
+                navigation-group: root.navigation-group;
+                next-value: i + 1 < root.tabs.length ? root.tabs[i + 1].value : root.tabs[0].value;
+                previous-value: i > 0 ? root.tabs[i - 1].value : root.tabs[root.tabs.length - 1].value;
+                first-value: root.tabs[0].value;
+                last-value: root.tabs[root.tabs.length - 1].value;
+            }
+
+            @children
+        }
+    }
+}
+
+export component TabsContent {
+    in property <string> value;
+    in property <string> selected-value;
+    in property <length> spacing;
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: tab-panel;
+    accessible-label: root.value;
+
+    VerticalLayout {
+        alignment: start;
+        spacing: root.spacing;
+        visible: root.value == root.selected-value;
+
+        @children
+    }
+}

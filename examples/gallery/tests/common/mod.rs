@@ -19,13 +19,21 @@ pub fn init() {
     .expect("platform already initialized on this thread");
 }
 
-/// The gallery in a window tall enough that its scroll area shows every section.
-pub fn gallery() -> slintcn_gallery::Gallery {
+/// Opens one gallery section in a window tall enough to cover all of its examples.
+pub fn gallery_section(section: &str) -> slintcn_gallery::Gallery {
     init();
     let gallery = slintcn_gallery::Gallery::new().unwrap();
-    gallery.window().set_size(slint::LogicalSize::new(960., 4800.));
-    gallery.show().unwrap();
+    gallery.set_selected_section(section.into());
     gallery
+        .window()
+        .set_size(slint::LogicalSize::new(960., 4800.));
+    gallery.show().unwrap();
+    settle();
+    gallery
+}
+
+pub fn gallery() -> slintcn_gallery::Gallery {
+    gallery_section("buttons")
 }
 
 /// Advances mocked time past every 150–200ms transition.
@@ -50,14 +58,31 @@ pub fn find_all(component: &impl ComponentHandle, label: &str) -> Vec<ElementHan
 /// Finds the one element with this accessible label, including inside open popups.
 pub fn find(component: &impl ComponentHandle, label: &str) -> ElementHandle {
     let mut found = find_all(component, label);
-    assert_eq!(found.len(), 1, "expected one element labelled {label:?}, found {}", found.len());
+    assert_eq!(
+        found.len(),
+        1,
+        "expected one element labelled {label:?}, found {}",
+        found.len()
+    );
     found.remove(0)
 }
 
 /// Finds the one element with this role and accessible label.
-pub fn find_role(component: &impl ComponentHandle, role: AccessibleRole, label: &str) -> ElementHandle {
-    let mut found: Vec<_> = find_all(component, label).into_iter().filter(|e| e.accessible_role() == Some(role)).collect();
-    assert_eq!(found.len(), 1, "expected one {role:?} labelled {label:?}, found {}", found.len());
+pub fn find_role(
+    component: &impl ComponentHandle,
+    role: AccessibleRole,
+    label: &str,
+) -> ElementHandle {
+    let mut found: Vec<_> = find_all(component, label)
+        .into_iter()
+        .filter(|e| e.accessible_role() == Some(role))
+        .collect();
+    assert_eq!(
+        found.len(),
+        1,
+        "expected one {role:?} labelled {label:?}, found {}",
+        found.len()
+    );
     found.remove(0)
 }
 
@@ -98,8 +123,12 @@ const CHANNEL_TOLERANCE: u8 = 8;
 pub fn assert_screenshot(window: &slint::Window, name: &str) {
     settle();
     let snapshot = window.take_snapshot().expect("take_snapshot failed");
-    let actual = image::RgbaImage::from_raw(snapshot.width(), snapshot.height(), snapshot.as_bytes().to_vec())
-        .expect("snapshot buffer has the wrong size");
+    let actual = image::RgbaImage::from_raw(
+        snapshot.width(),
+        snapshot.height(),
+        snapshot.as_bytes().to_vec(),
+    )
+    .expect("snapshot buffer has the wrong size");
 
     let baseline_dir = target_dir().join("screenshots");
     let baseline_path = baseline_dir.join(format!("{name}.png"));
@@ -110,15 +139,26 @@ pub fn assert_screenshot(window: &slint::Window, name: &str) {
         return;
     }
 
-    let expected = image::open(&baseline_path).expect("unreadable baseline").to_rgba8();
+    let expected = image::open(&baseline_path)
+        .expect("unreadable baseline")
+        .to_rgba8();
     let reason = if expected.dimensions() != actual.dimensions() {
-        format!("size {:?} differs from the baseline's {:?}", actual.dimensions(), expected.dimensions())
+        format!(
+            "size {:?} differs from the baseline's {:?}",
+            actual.dimensions(),
+            expected.dimensions()
+        )
     } else {
         let mut diff = image::RgbaImage::new(actual.width(), actual.height());
         let mut differing = 0usize;
         for (x, y, a) in actual.enumerate_pixels() {
             let e = expected.get_pixel(x, y);
-            let delta = a.0.iter().zip(e.0).map(|(a, e)| a.abs_diff(e)).max().unwrap();
+            let delta =
+                a.0.iter()
+                    .zip(e.0)
+                    .map(|(a, e)| a.abs_diff(e))
+                    .max()
+                    .unwrap();
             let pixel = if delta > CHANNEL_TOLERANCE {
                 differing += 1;
                 [255, 0, 0, 255]
@@ -132,7 +172,8 @@ pub fn assert_screenshot(window: &slint::Window, name: &str) {
             return;
         }
         std::fs::create_dir_all(failures_dir()).unwrap();
-        diff.save(failures_dir().join(format!("{name}.diff.png"))).unwrap();
+        diff.save(failures_dir().join(format!("{name}.diff.png")))
+            .unwrap();
         format!("{differing} pixels differ")
     };
 
