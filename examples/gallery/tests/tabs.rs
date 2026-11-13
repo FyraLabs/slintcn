@@ -95,6 +95,14 @@ fn vertical_tabs_use_vertical_arrows() {
 }
 
 #[test]
+fn gallery_opens_the_tabs_section() {
+    let gallery = gallery();
+    click(&find_role(&gallery, AccessibleRole::Tab, "Tabs"));
+    assert_eq!(gallery.get_selected_section(), "tabs");
+    assert!(exists(&gallery, "Account"));
+}
+
+#[test]
 fn gallery_unmounts_inactive_examples() {
     let gallery = gallery();
     assert!(!exists(&gallery, "Profile"));

@@ -196,7 +196,8 @@ export component Gallery inherits Window {
                 if root.selected-section == "tabs": TabsContent {
                     value: "tabs";
                     selected-value: root.selected-section;
-                    TabsExamples {}
+                    // Definite width avoids a layout recursion in nested auto-width tabs.
+                    TabsExamples { width: 620px; }
                 }
             }
 
