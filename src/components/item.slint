@@ -1,0 +1,289 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SlintcnPalette, SlintcnSizeSettings } from "styling.slint";
+
+export enum ItemVariant {
+    default,
+    outline,
+    muted,
+}
+
+export enum ItemSize {
+    default,
+    sm,
+    xs,
+}
+
+export enum ItemMediaVariant {
+    default,
+    icon,
+    image,
+}
+
+
+// A list item component that can be used to display content in a list or grid. It supports different variants, sizes, and media types. The item can be clickable and can have actions associated with it.
+export component Item {
+    in property <ItemVariant> variant;
+    in property <ItemSize> size;
+    in property <bool> clickable;
+    in property <bool> enabled: true;
+
+    callback clicked;
+
+    out property <bool> has-focus: i-focus-scope.has-focus;
+
+    private property <bool> hovered: i-touch-area.has-hover;
+    private property <bool> keyboard-focus;
+    private property <bool> focus-visible: root.clickable && root.enabled && root.has-focus && root.keyboard-focus;
+    // Nova sizes default and sm the same; only xs is tighter.
+    private property <length> padding-x: root.size == ItemSize.xs ? 10px : 12px;
+    private property <length> padding-y: root.size == ItemSize.xs ? 8px : 10px;
+    private property <length> gap: root.size == ItemSize.xs ? 8px : 10px;
+
+    min-height: i-layout.preferred-height;
+    preferred-height: i-layout.preferred-height;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    forward-focus: i-focus-scope;
+
+    accessible-role: list-item;
+    accessible-enabled: root.enabled;
+
+    public function activate() {
+        if root.clickable && root.enabled {
+            root.clicked();
+        }
+    }
+
+    // Below the content so buttons inside the item stay clickable.
+    i-touch-area := TouchArea {
+        enabled: root.clickable && root.enabled;
+        mouse-cursor: root.clickable && root.enabled ? pointer : default;
+        clicked => {
+            if root.clickable && root.enabled {
+                root.keyboard-focus = false;
+                i-focus-scope.focus();
+                root.activate();
+            }
+        }
+    }
+
+    i-background := Rectangle {
+        border-radius: SlintcnSizeSettings.radius-lg;
+        border-width: 1px;
+        border-color: root.focus-visible ? SlintcnPalette.ring : root.variant == ItemVariant.outline ? SlintcnPalette.border : transparent;
+        background: root.clickable && root.hovered && root.enabled ? SlintcnPalette.muted : root.variant == ItemVariant.muted ? SlintcnPalette.muted.transparentize(0.5) : transparent;
+        opacity: root.enabled ? 1 : 0.5;
+
+        animate background, border-color { duration: 100ms; easing: cubic-bezier(0.4, 0, 0.2, 1); }
+
+        i-layout := FlexboxLayout {
+            flex-direction: row;
+            flex-wrap: wrap;
+            alignment: stretch;
+            cross-axis-alignment: center;
+            spacing-horizontal: root.gap;
+            spacing-vertical: root.gap;
+            padding-left: root.padding-x;
+            padding-right: root.padding-x;
+            padding-top: root.padding-y;
+            padding-bottom: root.padding-y;
+
+            @children
+        }
+    }
+
+    if root.focus-visible: Rectangle {
+        x: -3px;
+        y: -3px;
+        width: root.width + 6px;
+        height: root.height + 6px;
+        border-radius: SlintcnSizeSettings.radius-lg + 3px;
+        border-width: 3px;
+        border-color: SlintcnPalette.ring.transparentize(0.5);
+    }
+
+    i-focus-scope := FocusScope {
+        x: 0;
+        width: 0;
+        enabled: root.clickable && root.enabled;
+
+        focus-gained(reason) => {
+            if reason != FocusReason.window-activation {
+                root.keyboard-focus = reason == FocusReason.tab-navigation;
+            }
+        }
+
+        key-pressed(event) => {
+            if root.clickable && root.enabled && (event.text == Key.Space || event.text == Key.Return) {
+                root.activate();
+                return accept;
+            }
+            return reject;
+        }
+    }
+}
+
+export component ItemGroup inherits VerticalLayout {
+    spacing: 16px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: AccessibleRole.list;
+}
+
+export component ItemSeparator {
+    min-height: 17px;
+    preferred-height: 17px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    Rectangle {
+        y: (parent.height - self.height) / 2;
+        height: 1px;
+        background: SlintcnPalette.border;
+    }
+}
+
+export component ItemMedia {
+    in property <ItemMediaVariant> variant;
+    in property <ItemSize> size;
+    in property <image> image;
+    in property <bool> with-description;
+
+    private property <bool> has-image: root.image.width > 0 && root.image.height > 0;
+    private property <length> image-size: root.size == ItemSize.xs ? 24px : root.size == ItemSize.sm ? 32px : 40px;
+
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+
+    accessible-role: none;
+
+    i-layout := HorizontalLayout {
+        spacing: 8px;
+        alignment: center;
+        cross-axis-alignment: center;
+        padding-top: root.with-description ? 2px : 0;
+
+        if root.variant == ItemMediaVariant.icon && root.has-image: Image {
+            source: root.image;
+            width: 16px;
+            height: 16px;
+            colorize: SlintcnPalette.foreground;
+            accessible-role: none;
+        }
+
+        if root.variant == ItemMediaVariant.image && root.has-image: Rectangle {
+            width: root.image-size;
+            height: root.image-size;
+            border-radius: SlintcnSizeSettings.radius-sm;
+            clip: true;
+
+            Image {
+                source: root.image;
+                image-fit: cover;
+                accessible-role: none;
+            }
+        }
+
+        @children
+    }
+}
+
+export component ItemContent inherits VerticalLayout {
+    in property <ItemSize> size;
+    in property <bool> grow: true;
+
+    spacing: root.size == ItemSize.xs ? 0 : 4px;
+    alignment: start;
+    horizontal-stretch: root.grow ? 1 : 0;
+    vertical-stretch: 0;
+}
+
+export component ItemTitle inherits Text {
+    font-size: 14px;
+
+    i-metrics := Text {
+        x: 0;
+        y: 0;
+        width: 0;
+        height: 0;
+        visible: false;
+        font-size: 14px;
+    }
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: AccessibleRole.text;
+    accessible-label: root.text;
+
+    color: SlintcnPalette.foreground;
+    font-weight: 500;
+    line-height-factor: 19.25px / (i-metrics.font-metrics.ascent - i-metrics.font-metrics.descent);
+    wrap: word-wrap;
+}
+
+export component ItemDescription inherits Text {
+    in property <ItemSize> size;
+
+    font-size: root.size == ItemSize.xs ? 12px : 14px;
+    private property <length> line-height: root.size == ItemSize.xs ? 18px : 21px;
+
+    i-metrics := Text {
+        x: 0;
+        y: 0;
+        width: 0;
+        height: 0;
+        visible: false;
+        font-size: root.size == ItemSize.xs ? 12px : 14px;
+    }
+
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    accessible-role: AccessibleRole.text;
+    accessible-label: root.text;
+
+    color: SlintcnPalette.muted-foreground;
+    line-height-factor: root.line-height / (i-metrics.font-metrics.ascent - i-metrics.font-metrics.descent);
+    wrap: word-wrap;
+    max-lines: 2;
+    overflow: elide;
+}
+
+export component ItemActions {
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+
+    i-layout := HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        cross-axis-alignment: center;
+
+        @children
+    }
+}
+
+export component ItemHeader {
+    width: 100%;
+    vertical-stretch: 0;
+
+    i-layout := HorizontalLayout {
+        spacing: 8px;
+        alignment: space-between;
+        cross-axis-alignment: center;
+
+        @children
+    }
+}
+
+export component ItemFooter {
+    width: 100%;
+    vertical-stretch: 0;
+
+    i-layout := HorizontalLayout {
+        spacing: 8px;
+        alignment: space-between;
+        cross-axis-alignment: center;
+
+        @children
+    }
+}

@@ -8,11 +8,15 @@ import { FieldExamples } from "fields.slint";
 import { ButtonGroupExamples } from "button-groups.slint";
 import { CardExamples } from "cards.slint";
 import { MenuExamples } from "menus.slint";
+import { LabelExamples } from "labels.slint";
+import { ItemExamples } from "items.slint";
 
 export { ButtonGroupPreview } from "button-groups.slint";
 export { CardPreview } from "cards.slint";
 export { FieldPreview } from "fields.slint";
 export { MenuPreview } from "menus.slint";
+export { LabelPreview } from "labels.slint";
+export { ItemPreview } from "items.slint";
 
 export component Gallery inherits Window {
     title: "slintcn gallery";
@@ -124,6 +128,14 @@ export component Gallery inherits Window {
                     color: SlintcnPalette.muted-foreground;
                     vertical-alignment: center;
                 }
+            }
+
+            LabelExamples {
+                changed(message) => { root.last-result = message; }
+            }
+
+            ItemExamples {
+                clicked(message) => { root.last-result = message; }
             }
         }
     }

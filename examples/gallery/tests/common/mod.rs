@@ -23,7 +23,7 @@ pub fn init() {
 pub fn gallery() -> slintcn_gallery::Gallery {
     init();
     let gallery = slintcn_gallery::Gallery::new().unwrap();
-    gallery.window().set_size(slint::LogicalSize::new(960., 3400.));
+    gallery.window().set_size(slint::LogicalSize::new(960., 4800.));
     gallery.show().unwrap();
     gallery
 }

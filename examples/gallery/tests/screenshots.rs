@@ -3,9 +3,12 @@ mod common;
 use common::*;
 use slint::language::ColorScheme;
 use slint::{ComponentHandle, LogicalSize};
-use slintcn_gallery::{ButtonGroupPreview, CardPreview, FieldPreview, MenuPreview};
+use slintcn_gallery::{
+    ButtonGroupPreview, CardPreview, FieldPreview, ItemPreview, LabelPreview, MenuPreview,
+};
 
-const SCHEMES: [(ColorScheme, &str); 2] = [(ColorScheme::Light, "light"), (ColorScheme::Dark, "dark")];
+const SCHEMES: [(ColorScheme, &str); 2] =
+    [(ColorScheme::Light, "light"), (ColorScheme::Dark, "dark")];
 
 #[test]
 fn gallery() {
@@ -35,6 +38,28 @@ fn cards() {
     for (scheme, name) in SCHEMES {
         preview.set_color_scheme(scheme);
         assert_screenshot(preview.window(), &format!("cards-{name}"));
+    }
+}
+
+#[test]
+fn labels() {
+    init();
+    let preview = LabelPreview::new().unwrap();
+    preview.show().unwrap();
+    for (scheme, name) in SCHEMES {
+        preview.set_color_scheme(scheme);
+        assert_screenshot(preview.window(), &format!("labels-{name}"));
+    }
+}
+
+#[test]
+fn items() {
+    init();
+    let preview = ItemPreview::new().unwrap();
+    preview.show().unwrap();
+    for (scheme, name) in SCHEMES {
+        preview.set_color_scheme(scheme);
+        assert_screenshot(preview.window(), &format!("items-{name}"));
     }
 }
 

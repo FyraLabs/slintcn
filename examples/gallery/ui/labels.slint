@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Checkbox } from "@slintcn/checkbox.slint";
+import { Input } from "@slintcn/input.slint";
+import { Label } from "@slintcn/label.slint";
+import { SlintcnPalette } from "@slintcn/styling.slint";
+
+export component LabelExamples inherits VerticalLayout {
+    callback changed(string);
+    out property <bool> accepted: terms.checked;
+    out property <bool> email-focused: email.has-focus;
+    out property <bool> disabled-accepted: disabled-terms.checked;
+
+    spacing: 24px;
+    alignment: start;
+    vertical-stretch: 0;
+
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        cross-axis-alignment: center;
+
+        terms := Checkbox {
+            accessible-label: "Accept terms";
+            toggled => { root.changed("Terms toggled"); }
+        }
+        Label {
+            text: "Accept terms and conditions";
+            clicked => {
+                terms.checked = !terms.checked;
+                root.changed("Terms toggled");
+            }
+        }
+    }
+
+    VerticalLayout {
+        width: 320px;
+        spacing: 8px;
+
+        Label {
+            text: "Email address";
+            clicked => { email.focus(); }
+        }
+        email := Input {
+            accessible-label: "Email address input";
+            placeholder-text: "m@example.com";
+        }
+    }
+
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        cross-axis-alignment: center;
+
+        disabled-terms := Checkbox { enabled: false; accessible-label: "Disabled checkbox"; }
+        Label {
+            text: "Disabled label";
+            enabled: false;
+            clicked => { disabled-terms.checked = !disabled-terms.checked; }
+        }
+    }
+
+    Label {
+        text: "Notifications";
+        Image {
+            source: @image-url("icons/circle-check.svg");
+            width: 16px;
+            height: 16px;
+            colorize: SlintcnPalette.foreground;
+            accessible-role: none;
+        }
+    }
+}
+
+export component LabelPreview inherits Window {
+    in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+    out property <bool> accepted: examples.accepted;
+    out property <bool> email-focused: examples.email-focused;
+    out property <bool> disabled-accepted: examples.disabled-accepted;
+
+    title: "slintcn labels";
+    width: 480px;
+    height: 320px;
+    background: SlintcnPalette.background;
+
+    VerticalLayout {
+        padding: 32px;
+        alignment: start;
+        examples := LabelExamples {}
+    }
+}

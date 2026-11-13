@@ -1,0 +1,243 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Button, ButtonSize, ButtonVariant } from "@slintcn/button.slint";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemGroup, ItemHeader, ItemMedia, ItemMediaVariant, ItemSeparator, ItemSize, ItemTitle, ItemVariant } from "@slintcn/item.slint";
+import { SlintcnPalette, SlintcnSizeSettings } from "@slintcn/styling.slint";
+
+export component ItemExamples inherits HorizontalLayout {
+    callback clicked(string);
+    out property <bool> verified-focused: verified.has-focus;
+
+    spacing: 24px;
+    alignment: start;
+    vertical-stretch: 0;
+
+    VerticalLayout {
+        width: 420px;
+        spacing: 24px;
+        alignment: start;
+
+        Item {
+            variant: ItemVariant.outline;
+            accessible-label: "Basic item";
+
+            ItemContent {
+                ItemTitle { text: "Basic Item"; }
+                ItemDescription { text: "A simple item with title and description."; }
+            }
+            ItemActions {
+                Button {
+                    text: "Action";
+                    size: ButtonSize.sm;
+                    variant: ButtonVariant.outline;
+                    clicked => { root.clicked("Action"); }
+                }
+            }
+        }
+
+        verified := Item {
+            variant: ItemVariant.outline;
+            size: ItemSize.sm;
+            clickable: true;
+            accessible-role: button;
+            accessible-label: "Verified profile";
+            accessible-action-default => { self.activate(); }
+            clicked => { root.clicked("Verified profile"); }
+
+            ItemMedia {
+                variant: ItemMediaVariant.icon;
+                image: @image-url("icons/circle-check.svg");
+            }
+            ItemContent {
+                size: ItemSize.sm;
+                ItemTitle { text: "Your profile has been verified."; }
+            }
+            ItemActions {
+                Image {
+                    source: @image-url("icons/chevron-right.svg");
+                    width: 16px;
+                    height: 16px;
+                    colorize: SlintcnPalette.foreground;
+                    accessible-role: none;
+                }
+            }
+        }
+
+        ItemGroup {
+            for variant in [ItemVariant.default, ItemVariant.outline, ItemVariant.muted]: Item {
+                variant: variant;
+
+                ItemMedia {
+                    variant: ItemMediaVariant.icon;
+                    image: @image-url("icons/circle-alert.svg");
+                    with-description: true;
+                    cross-axis-self-alignment: start;
+                }
+                ItemContent {
+                    ItemTitle { text: variant == ItemVariant.default ? "Default Variant" : variant == ItemVariant.outline ? "Outline Variant" : "Muted Variant"; }
+                    ItemDescription { text: "Use items for compact, structured content."; }
+                }
+            }
+        }
+
+        ItemGroup {
+            for size in [ItemSize.default, ItemSize.sm, ItemSize.xs]: Item {
+                variant: ItemVariant.outline;
+                size: size;
+
+                ItemMedia {
+                    variant: ItemMediaVariant.icon;
+                    image: @image-url("icons/circle-check.svg");
+                    size: size;
+                    with-description: true;
+                    cross-axis-self-alignment: start;
+                }
+                ItemContent {
+                    size: size;
+                    ItemTitle { text: size == ItemSize.default ? "Default Size" : size == ItemSize.sm ? "Small Size" : "Extra Small Size"; }
+                    ItemDescription { text: "The extra small size uses tighter spacing."; size: size; }
+                }
+            }
+        }
+
+        Item {
+            variant: ItemVariant.outline;
+            ItemContent {
+                ItemTitle { text: "Wrapped description"; }
+                ItemDescription { text: "This description wraps over several lines, but the item displays only the first two. Additional content is elided so that long descriptions do not make list rows unnecessarily tall. The full description remains available to accessibility tools."; }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 16px;
+            alignment: start;
+            cross-axis-alignment: center;
+            for size in [ItemSize.default, ItemSize.sm, ItemSize.xs]: ItemMedia {
+                variant: ItemMediaVariant.image;
+                size: size;
+                image: @image-url("images/cover.svg");
+            }
+        }
+    }
+
+    VerticalLayout {
+        width: 420px;
+        spacing: 24px;
+        alignment: start;
+
+        ItemGroup {
+            for track in [
+                { title: "Midnight City Lights", artist: "Neon Dreams", duration: "3:45" },
+                { title: "Digital Rain", artist: "Cyber Symphony", duration: "4:12" },
+                { title: "Electric Horizon", artist: "Aurora Pulse", duration: "5:03" },
+            ]: Item {
+                variant: ItemVariant.outline;
+                accessible-label: track.title;
+
+                ItemMedia {
+                    variant: ItemMediaVariant.image;
+                    image: @image-url("images/cover.svg");
+                    with-description: true;
+                    cross-axis-self-alignment: start;
+                }
+                ItemContent {
+                    ItemTitle { text: track.title; }
+                    ItemDescription { text: track.artist; }
+                }
+                ItemContent {
+                    grow: false;
+                    ItemDescription { text: track.duration; }
+                }
+            }
+        }
+
+        Item {
+            variant: ItemVariant.outline;
+            accessible-label: "Event item";
+
+            ItemHeader {
+                Rectangle {
+                    height: 160px;
+                    horizontal-stretch: 1;
+                    border-radius: SlintcnSizeSettings.radius-sm;
+                    clip: true;
+                    Image { source: @image-url("images/cover.svg"); image-fit: cover; accessible-role: none; }
+                }
+            }
+            ItemContent {
+                ItemTitle { text: "Design systems meetup"; }
+                ItemDescription { text: "A practical talk on component APIs, accessibility, and shipping faster."; }
+            }
+            ItemFooter {
+                ItemDescription { text: "Friday, 6:00 PM"; horizontal-stretch: 0; }
+                Button {
+                    text: "View event";
+                    size: ButtonSize.sm;
+                    variant: ButtonVariant.outline;
+                    clicked => { root.clicked("View event"); }
+                }
+            }
+        }
+
+        ItemGroup {
+            Item {
+                clickable: true;
+                variant: ItemVariant.muted;
+                accessible-role: button;
+                accessible-label: "Account settings";
+                accessible-action-default => { self.activate(); }
+                clicked => { root.clicked("Account settings"); }
+
+                ItemContent {
+                    ItemTitle { text: "Account settings"; }
+                    ItemDescription { text: "Manage your account preferences."; }
+                }
+                ItemActions {
+                    Button {
+                        text: "Edit";
+                        size: ButtonSize.sm;
+                        variant: ButtonVariant.outline;
+                        clicked => { root.clicked("Edit account"); }
+                    }
+                }
+            }
+            ItemSeparator {}
+            Item {
+                clickable: true;
+                enabled: false;
+                variant: ItemVariant.outline;
+                accessible-role: button;
+                accessible-label: "Disabled item";
+                accessible-action-default => { self.activate(); }
+                clicked => { root.clicked("Disabled item"); }
+
+                ItemContent {
+                    ItemTitle { text: "Unavailable"; }
+                    ItemDescription { text: "This item is disabled."; }
+                }
+            }
+        }
+    }
+}
+
+export component ItemPreview inherits Window {
+    in-out property <ColorScheme> color-scheme <=> SlintcnPalette.color-scheme;
+    out property <string> last-result;
+    out property <int> activation-count;
+    out property <bool> verified-focused: examples.verified-focused;
+
+    title: "slintcn items";
+    width: 928px;
+    height: 1040px;
+    background: SlintcnPalette.background;
+
+    VerticalLayout {
+        padding: 32px;
+        alignment: start;
+        examples := ItemExamples {
+            clicked(message) => {
+                root.last-result = message;
+                root.activation-count += 1;
+            }
+        }
+    }
+}

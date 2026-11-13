@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SlintcnPalette } from "styling.slint";
+
+export component Label {
+    in property <string> text;
+    in property <bool> enabled: true;
+
+    callback clicked;
+
+    private property <length> font-size: 14px;
+
+    i-metrics := Text {
+        x: 0;
+        y: 0;
+        width: 0;
+        height: 0;
+        visible: false;
+        font-size: root.font-size;
+    }
+
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    accessible-role: AccessibleRole.text;
+    accessible-label: root.text;
+    accessible-enabled: root.enabled;
+
+    i-touch-area := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: root.enabled ? default : not-allowed;
+        clicked => { root.clicked(); }
+    }
+
+    i-layout := HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        cross-axis-alignment: center;
+        opacity: root.enabled ? 1 : 0.5;
+
+        i-text := Text {
+            text: root.text;
+            color: SlintcnPalette.foreground;
+            font-size: root.font-size;
+            font-weight: 500;
+            line-height-factor: root.font-size / (i-metrics.font-metrics.ascent - i-metrics.font-metrics.descent);
+            accessible-role: none;
+        }
+
+        @children
+    }
+}
